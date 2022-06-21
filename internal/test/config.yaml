@@ -1,0 +1,3 @@
+
+NsqChannel: gotest
+NsqHandlerConcurrency: 3
