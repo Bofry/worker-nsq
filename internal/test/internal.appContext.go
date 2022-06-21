@@ -28,8 +28,9 @@ type (
 	}
 
 	TopicGateway struct {
-		*GoTestTopicMessageHandler `topic:"gotestTopic"`
-		*UnhandledMessageHandler   `topic:"?"`
+		GoTest2Topic *GoTestTopicMessageHandler `topic:"gotest2Topic"`
+		GoTestTopic  *GoTestTopicMessageHandler `topic:"gotestTopic"`
+		Unhandled    *UnhandledMessageHandler   `topic:"?"`
 	}
 )
 

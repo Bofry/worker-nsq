@@ -82,6 +82,13 @@ func setupTestStarter() error {
 	}
 
 	{
+		topic := "gotest2Topic"
+		for _, word := range []string{"Welcome", "to", "the", "Nsq", "Golang", "client", "library"} {
+			p.Write(topic, []byte(word))
+		}
+	}
+
+	{
 		topic := "unknownTopic"
 		for _, word := range []string{"unknown"} {
 			p.Write(topic, []byte(word))
