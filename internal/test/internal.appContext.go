@@ -1,4 +1,4 @@
-package standardtest
+package test
 
 import (
 	"fmt"
@@ -12,6 +12,9 @@ type (
 		Host            *Host
 		Config          *Config
 		ServiceProvider *ServiceProvider
+
+		Component       *MockComponent
+		ComponentRunner *MockComponentRunner
 	}
 
 	Host nsq.Worker
@@ -33,6 +36,13 @@ type (
 		Unhandled    *UnhandledMessageHandler   `topic:"?"`
 	}
 )
+
+func (app *App) Init(conf *Config) {
+	fmt.Println("App.Init()")
+
+	app.Component = &MockComponent{}
+	app.ComponentRunner = &MockComponentRunner{prefix: "MockComponentRunner"}
+}
 
 func (provider *ServiceProvider) Init(conf *Config) {
 	fmt.Println("ServiceProvider.Init()")
