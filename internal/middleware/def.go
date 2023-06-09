@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"reflect"
 
 	"github.com/Bofry/worker-nsq/internal"
@@ -19,4 +20,16 @@ var (
 
 type (
 	ConfigureUnhandledMessageHandleProc func(handler internal.MessageHandler)
+
+	LoggingService interface {
+		CreateEventLog(ev EventEvidence) EventLog
+		ConfigureLogger(l *log.Logger)
+	}
+
+	EventLog interface {
+		BeforeProcessMessage(message *internal.Message)
+		LogError(message *internal.Message, err interface{}, stackTrace []byte)
+		AfterProcessMessage(message *internal.Message)
+		Flush()
+	}
 )

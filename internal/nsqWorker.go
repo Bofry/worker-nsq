@@ -2,11 +2,14 @@ package internal
 
 import (
 	"context"
+	"log"
 	"strings"
 	"sync"
 
 	"github.com/Bofry/host"
 	nsq "github.com/Bofry/lib-nsq"
+	"github.com/Bofry/trace"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 var _ host.Host = new(NsqWorker)
@@ -19,7 +22,14 @@ type NsqWorker struct {
 
 	consumer *nsq.Consumer
 
-	dispatcher *NsqMessageDispatcher
+	logger *log.Logger
+
+	messageDispatcher *MessageDispatcher
+	messageManager    interface{}
+
+	router               Router
+	messageHandleService *MessageHandleService
+	messageTracerService *MessageTracerService
 
 	wg          sync.WaitGroup
 	mutex       sync.Mutex
@@ -30,10 +40,10 @@ type NsqWorker struct {
 
 func (w *NsqWorker) Start(ctx context.Context) {
 	if w.disposed {
-		logger.Panic("the Worker has been disposed")
+		NsqWorkerLogger.Panic("the Worker has been disposed")
 	}
 	if !w.initialized {
-		logger.Panic("the Worker havn't be initialized yet")
+		NsqWorkerLogger.Panic("the Worker havn't be initialized yet")
 	}
 	if w.running {
 		return
@@ -52,10 +62,10 @@ func (w *NsqWorker) Start(ctx context.Context) {
 	w.running = true
 
 	var (
-		topics = w.dispatcher.Topics()
+		topics = w.messageDispatcher.Topics()
 	)
 
-	logger.Printf("channel [%s] topics [%s] on address %s\n",
+	NsqWorkerLogger.Printf("channel [%s] topics [%s] on address %s\n",
 		w.Channel,
 		strings.Join(topics, ","),
 		w.NsqAddress)
@@ -64,23 +74,38 @@ func (w *NsqWorker) Start(ctx context.Context) {
 		c := w.consumer
 		err := c.Subscribe(topics)
 		if err != nil {
-			logger.Panic(err)
+			NsqWorkerLogger.Panic(err)
 		}
 	}
 }
 
 func (w *NsqWorker) Stop(ctx context.Context) error {
-	logger.Printf("%% Stopping\n")
+	NsqWorkerLogger.Printf("%% Stopping\n")
 	defer func() {
-		logger.Printf("%% Stopped\n")
+		NsqWorkerLogger.Printf("%% Stopped\n")
 	}()
 
 	w.consumer.Close()
 	return nil
 }
 
+func (w *NsqWorker) Logger() *log.Logger {
+	return w.logger
+}
+
 func (w *NsqWorker) preInit() {
-	w.dispatcher = NewNsqMessageDispatcher()
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	w.router = make(Router)
+	w.messageHandleService = NewMessageHandleService()
+	w.messageTracerService = NewMessageTracerService()
+
+	w.messageDispatcher = &MessageDispatcher{
+		MessageHandleService: w.messageHandleService,
+		MessageTracerService: w.messageTracerService,
+		Router:               w.router,
+	}
 }
 
 func (w *NsqWorker) init() {
@@ -94,18 +119,40 @@ func (w *NsqWorker) init() {
 		w.mutex.Unlock()
 	}()
 
+	w.messageTracerService.init(w.messageManager)
+	w.messageDispatcher.init()
 	w.configConsumer()
 }
 
 func (w *NsqWorker) configConsumer() {
 	instance := &nsq.Consumer{
-		NsqAddress:              w.NsqAddress,
-		Channel:                 w.Channel,
-		HandlerConcurrency:      w.HandlerConcurrency,
-		Config:                  w.Config,
-		MessageHandler:          w.dispatcher.ProcessMessage,
-		UnhandledMessageHandler: w.dispatcher.ProcessUnhandledMessage,
+		NsqAddress:         w.NsqAddress,
+		Channel:            w.Channel,
+		HandlerConcurrency: w.HandlerConcurrency,
+		Config:             w.Config,
+		MessageHandler:     w.receiveMessage,
 	}
 
 	w.consumer = instance
+}
+
+func (w *NsqWorker) receiveMessage(message *Message) error {
+	ctx := &Context{
+		logger:                  w.logger,
+		Channel:                 w.Channel,
+		unhandledMessageHandler: nil, // be determined by MessageDispatcher
+	}
+	return w.messageDispatcher.ProcessMessage(ctx, message)
+}
+
+func (w *NsqWorker) setTextMapPropagator(propagator propagation.TextMapPropagator) {
+	w.messageTracerService.TextMapPropagator = propagator
+}
+
+func (w *NsqWorker) setTracerProvider(provider *trace.SeverityTracerProvider) {
+	w.messageTracerService.TracerProvider = provider
+}
+
+func (w *NsqWorker) setLogger(l *log.Logger) {
+	w.logger = l
 }

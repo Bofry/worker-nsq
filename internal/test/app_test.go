@@ -27,11 +27,10 @@ func TestStarter(t *testing.T) {
 	app := App{}
 	starter := nsq.Startup(&app).
 		Middlewares(
-			nsq.UseTopicGateway(&TopicGateway{}),
-			// nsq.UseErrorHandler(func(err error) (disposed bool) {
-			// 	t.Logf("catch err: %v", err)
-			// 	return false
-			// }),
+			nsq.UseMessageManager(&MessageManager{}),
+			nsq.UseErrorHandler(func(ctx *nsq.Context, msg *nsq.Message, err interface{}) {
+				t.Logf("catch err: %v", err)
+			}),
 		).
 		ConfigureConfiguration(func(service *config.ConfigurationService) {
 			service.
@@ -58,15 +57,15 @@ func TestStarter(t *testing.T) {
 	// assert app.Config
 	{
 		conf := app.Config
-		var expectedNsqAddress string = os.Getenv("NSQ_ADDRESS")
+		var expectedNsqAddress string = os.Getenv("NSQD_ADDRESS")
 		if !reflect.DeepEqual(conf.NsqAddress, expectedNsqAddress) {
-			t.Errorf("assert 'Config.RedisAddress':: expected '%v', got '%v'", expectedNsqAddress, conf.NsqAddress)
+			t.Errorf("assert 'Config.NsqAddress':: expected '%v', got '%v'", expectedNsqAddress, conf.NsqAddress)
 		}
 	}
 }
 
 func setupTestStarter() error {
-	p, err := nsq.NewForwarder(&nsq.ProducerOption{
+	p, err := nsq.NewForwarder(&nsq.ProducerConfig{
 		Address: strings.Split(os.Getenv("NSQD_SERVERS"), ","),
 		Config:  nsq.NewConfig(),
 	})

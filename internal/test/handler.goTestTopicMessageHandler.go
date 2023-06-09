@@ -14,8 +14,8 @@ func (h *GoTestTopicMessageHandler) Init() {
 	log.Printf("GoTestTopicMessageHandler.Init()")
 }
 
-func (h *GoTestTopicMessageHandler) ProcessMessage(message *nsq.Message) error {
+func (h *GoTestTopicMessageHandler) ProcessMessage(ctx *nsq.Context, message *nsq.Message) error {
 	log.Printf("Message on %s (%s): %v\n", message.Topic, message.NSQDAddress, string(message.Body))
 
-	return message.ForwardUnhandledMessageHandler()
+	return ctx.ForwardUnhandledMessage(message)
 }

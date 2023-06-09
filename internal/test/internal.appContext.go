@@ -21,7 +21,7 @@ type (
 
 	Config struct {
 		// redis
-		NsqAddress            string `env:"*NSQ_ADDRESS"         yaml:"-"`
+		NsqAddress            string `env:"*NSQD_ADDRESS"        yaml:"-"`
 		NsqChannel            string `env:"-"                    yaml:"NsqChannel"`
 		NsqHandlerConcurrency int    `env:"-"                    yaml:"NsqHandlerConcurrency"`
 	}
@@ -30,7 +30,7 @@ type (
 		ResourceName string
 	}
 
-	TopicGateway struct {
+	MessageManager struct {
 		GoTest2Topic *GoTestTopicMessageHandler `topic:"gotest2Topic"`
 		GoTestTopic  *GoTestTopicMessageHandler `topic:"gotestTopic"`
 		Unhandled    *UnhandledMessageHandler   `topic:"?"`
