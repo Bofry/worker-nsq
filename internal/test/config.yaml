@@ -1,5 +1,0 @@
-NsqChannel: gotest
-NsqHandlerConcurrency: 3
-
-jaegerTraceUrl: http://localhost:14268/api/traces
-jaegerQueryUrl: http://localhost:16686/api/traces
