@@ -13,7 +13,9 @@ type (
 	Message        = nsq.Message
 	Config         = nsq.Config
 
+	EventEvidence  = middleware.EventEvidence
 	LoggingService = middleware.LoggingService
+	EventLog       = middleware.EventLog
 
 	MessageHandler = internal.MessageHandler
 	Worker         = internal.NsqWorker

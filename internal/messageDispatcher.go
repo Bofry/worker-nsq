@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/Bofry/lib-nsq/tracing"
@@ -85,11 +84,6 @@ func (d *MessageDispatcher) internalProcessMessage(ctx *Context, message *Messag
 			trace.SpanToContext(ctx, sp)
 
 			finalizer.Add(func(err interface{}) {
-				// set Span
-				trace.SpanToContext(ctx, sp)
-
-				defer sp.End()
-
 				if err != nil {
 					if e, ok := err.(error); ok {
 						sp.Err(e)
@@ -107,7 +101,7 @@ func (d *MessageDispatcher) internalProcessMessage(ctx *Context, message *Messag
 				trace.Topic(topic),
 				trace.ConsumerGroup(ctx.Channel),
 				trace.BrokerIP(message.NSQDAddress),
-				trace.MessageID(hex.EncodeToString(message.ID[:])),
+				trace.MessageID(string(message.ID[:])),
 				trace.Key("attempts").Int(int(message.Attempts)),
 			)
 
