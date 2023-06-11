@@ -93,7 +93,7 @@ func (w *NsqWorker) Logger() *log.Logger {
 	return w.logger
 }
 
-func (w *NsqWorker) preInit() {
+func (w *NsqWorker) alloc() {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 
@@ -131,6 +131,7 @@ func (w *NsqWorker) configConsumer() {
 		HandlerConcurrency: w.HandlerConcurrency,
 		Config:             w.Config,
 		MessageHandler:     w.receiveMessage,
+		Logger:             w.logger,
 	}
 
 	w.consumer = instance

@@ -16,6 +16,7 @@ import (
 
 	"github.com/Bofry/config"
 	nsq "github.com/Bofry/worker-nsq"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -80,10 +81,12 @@ func TestMain(m *testing.M) {
 		}
 	}
 
+	godotenv.Load(__ENV_FILE)
 	{
 		p, err := nsq.NewForwarder(&nsq.ProducerConfig{
-			Address: strings.Split(os.Getenv("NSQD_SERVERS"), ","),
+			Address: strings.Split(os.Getenv("TEST_NSQD_SERVERS"), ","),
 			Config:  nsq.NewConfig(),
+			Logger:  defaultLogger,
 		})
 		if err != nil {
 			panic(err)
@@ -151,7 +154,7 @@ func TestStartup(t *testing.T) {
 	// assert app.Config
 	{
 		conf := app.Config
-		var expectedNsqAddress string = os.Getenv("NSQD_ADDRESS")
+		var expectedNsqAddress string = os.Getenv("TEST_NSQLOOKUPD_ADDRESS")
 		if !reflect.DeepEqual(conf.NsqAddress, expectedNsqAddress) {
 			t.Errorf("assert 'Config.NsqAddress':: expected '%v', got '%v'", expectedNsqAddress, conf.NsqAddress)
 		}

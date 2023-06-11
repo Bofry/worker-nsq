@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	logger *log.Logger = log.New(log.Writer(), "[worker-nsq-test] ", log.LstdFlags|log.Lmsgprefix|log.LUTC)
+	defaultLogger *log.Logger = log.New(log.Writer(), "[worker-nsq-test] ", log.LstdFlags|log.Lmsgprefix|log.LUTC)
 )
 
 type (
@@ -29,9 +29,9 @@ type (
 
 	Config struct {
 		// nsq
-		NsqAddress            string `env:"*NSQD_ADDRESS"        yaml:"-"`
-		NsqChannel            string `env:"-"                    yaml:"NsqChannel"`
-		NsqHandlerConcurrency int    `env:"-"                    yaml:"NsqHandlerConcurrency"`
+		NsqAddress            string `env:"*TEST_NSQLOOKUPD_ADDRESS"   yaml:"-"`
+		NsqChannel            string `env:"-"                          yaml:"NsqChannel"`
+		NsqHandlerConcurrency int    `env:"-"                          yaml:"NsqHandlerConcurrency"`
 
 		// jaeger
 		JaegerTraceUrl string `yaml:"jaegerTraceUrl"`
@@ -61,22 +61,22 @@ func (app *App) OnStart(ctx context.Context) {
 
 func (app *App) OnStop(ctx context.Context) {
 	{
-		logger.Printf("stoping TracerProvider")
+		defaultLogger.Printf("stoping TracerProvider")
 		tp := trace.GetTracerProvider()
 		err := tp.Shutdown(ctx)
 		if err != nil {
-			logger.Printf("stoping TracerProvider error: %+v", err)
+			defaultLogger.Printf("stoping TracerProvider error: %+v", err)
 		}
 	}
 }
 
 func (app *App) ConfigureLogger(l *log.Logger) {
-	l.SetFlags(logger.Flags())
-	l.SetOutput(logger.Writer())
+	l.SetFlags(defaultLogger.Flags())
+	l.SetOutput(defaultLogger.Writer())
 }
 
 func (app *App) Logger() *log.Logger {
-	return logger
+	return defaultLogger
 }
 
 func (app *App) ConfigureTracerProvider() {
@@ -92,7 +92,7 @@ func (app *App) ConfigureTracerProvider() {
 		trace.Pid(),
 	)
 	if err != nil {
-		logger.Fatal(err)
+		defaultLogger.Fatal(err)
 	}
 
 	trace.SetTracerProvider(tp)
