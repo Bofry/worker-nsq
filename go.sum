@@ -9,6 +9,8 @@ github.com/Bofry/lib-nsq v0.1.1-0.20230609152815-0c4d41a69136/go.mod h1:Gnz4UMgZ
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020.0.20230519110520-05192d88fe05 h1:ou9yJ4uU9bZtmG04MHoZDEKaaKGCWBQm6igSoMfSN0c=
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020.0.20230519110520-05192d88fe05/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
+github.com/Bofry/structproto v0.2.0-alpha.20230613095206 h1:/L/2NiPVAE1La6umcWvIGQwAXuYthoU8uQvrmfCc4fg=
+github.com/Bofry/structproto v0.2.0-alpha.20230613095206/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
 github.com/Bofry/trace v0.0.0-20230326125907-fa414b460f9c/go.mod h1:PZxbK9ssiNWGM0rYpT5Xm3h6vkKQLze/7kCxdbNYgFQ=
 github.com/Bofry/trace v0.0.0-20230609150550-9f408e99bedf h1:EzBLsKVbJLoZns2HpaibmHwXUsaQeGZvug7ZkPo5TqM=
 github.com/Bofry/trace v0.0.0-20230609150550-9f408e99bedf/go.mod h1:GAiwGnBex/FjAmqB9ydLPvQth1E6ljJ10hSgS78U+8A=

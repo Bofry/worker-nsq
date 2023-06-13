@@ -4,6 +4,8 @@ import (
 	nsq "github.com/Bofry/worker-nsq"
 )
 
+var _ nsq.MessageHandler = new(GoTestTopicMessageHandler)
+
 type GoTestTopicMessageHandler struct {
 	ServiceProvider *ServiceProvider
 }

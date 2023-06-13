@@ -36,8 +36,9 @@ func (m *MessageManagerMiddleware) Init(app *host.AppModule) {
 func (m *MessageManagerMiddleware) bindMessageManager(target interface{}, binder *MessageManagerBinder) error {
 	prototype, err := structproto.Prototypify(target,
 		&structproto.StructProtoResolveOption{
-			TagName:     TAG_TOPIC,
-			TagResolver: TopicTagResolve,
+			TagName:             TAG_TOPIC,
+			TagResolver:         TopicTagResolver,
+			CheckDuplicateNames: true,
 		},
 	)
 	if err != nil {

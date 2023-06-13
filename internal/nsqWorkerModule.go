@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"io"
 	"reflect"
 
@@ -14,7 +13,6 @@ type NsqWorkerModule struct{}
 
 // ConfigureLogger implements host.HostService
 func (NsqWorkerModule) ConfigureLogger(logflags int, w io.Writer) {
-	fmt.Println("******NsqWorkerModule.ConfigureLogger()")
 	NsqWorkerLogger.SetFlags(logflags)
 	NsqWorkerLogger.SetOutput(w)
 }
