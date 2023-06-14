@@ -98,6 +98,7 @@ func (d *MessageDispatcher) internalProcessMessage(ctx *Context, message *Messag
 			})
 
 			sp.Tags(
+				// TODO: add nsq server version
 				trace.Topic(topic),
 				trace.ConsumerGroup(ctx.Channel),
 				trace.BrokerIP(message.NSQDAddress),
