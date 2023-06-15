@@ -10,6 +10,10 @@ github.com/Bofry/lib-nsq v0.2.0-alpha.20230615043444 h1:rsnmqTLAF2xn0klrW8MAUeQa
 github.com/Bofry/lib-nsq v0.2.0-alpha.20230615043444/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
 github.com/Bofry/lib-nsq v0.2.0-alpha.20230615043444.0.20230615051446-3cfdd74705cf h1:uG9sPXFgghqoVth/MrKDBgunBFNiYMFFf1Nhh17cxRM=
 github.com/Bofry/lib-nsq v0.2.0-alpha.20230615043444.0.20230615051446-3cfdd74705cf/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
+github.com/Bofry/lib-nsq v0.2.0-alpha.20230615043444.0.20230615143300-c4e90ecc4cc4 h1:Zs2a9em0q+TYN0iJ+GpIk7BlGBSomM1NQE0cWMcQNa4=
+github.com/Bofry/lib-nsq v0.2.0-alpha.20230615043444.0.20230615143300-c4e90ecc4cc4/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
+github.com/Bofry/lib-nsq v0.2.0-alpha.20230615164408 h1:PSoPbhEiIEg7xKW8GBfKqLBP+DvmfU7tfbi53dQjlhM=
+github.com/Bofry/lib-nsq v0.2.0-alpha.20230615164408/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020.0.20230519110520-05192d88fe05 h1:ou9yJ4uU9bZtmG04MHoZDEKaaKGCWBQm6igSoMfSN0c=
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020.0.20230519110520-05192d88fe05/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
