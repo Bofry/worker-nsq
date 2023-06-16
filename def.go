@@ -11,6 +11,7 @@ type (
 	Producer       = nsq.Producer
 	Forwarder      = nsq.Forwarder
 	Message        = nsq.Message
+	MessageContent = nsq.MessageContent
 	Config         = nsq.Config
 
 	EventEvidence  = middleware.EventEvidence

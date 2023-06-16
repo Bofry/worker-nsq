@@ -11,7 +11,7 @@ var _ host.HostModule = NsqWorkerModule{}
 
 type NsqWorkerModule struct{}
 
-// ConfigureLogger implements host.HostService
+// ConfigureLogger implements host.HostModule
 func (NsqWorkerModule) ConfigureLogger(logflags int, w io.Writer) {
 	NsqWorkerLogger.SetFlags(logflags)
 	NsqWorkerLogger.SetOutput(w)

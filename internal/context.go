@@ -33,10 +33,10 @@ type Context struct {
 	Channel string
 
 	logger *log.Logger
-	values map[interface{}]interface{}
 
 	unhandledMessageHandler MessageHandler
 
+	values     map[interface{}]interface{}
 	valuesOnce sync.Once
 }
 

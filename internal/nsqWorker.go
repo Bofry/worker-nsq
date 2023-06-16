@@ -139,8 +139,8 @@ func (w *NsqWorker) configConsumer() {
 
 func (w *NsqWorker) receiveMessage(message *Message) error {
 	ctx := &Context{
-		logger:                  w.logger,
 		Channel:                 w.Channel,
+		logger:                  w.logger,
 		unhandledMessageHandler: nil, // be determined by MessageDispatcher
 	}
 	return w.messageDispatcher.ProcessMessage(ctx, message)
