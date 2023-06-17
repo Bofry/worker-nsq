@@ -42,7 +42,11 @@ func (b *MessageManagerBinder) Bind(field structproto.FieldInfo, rv reflect.Valu
 	}
 
 	// register MessageHandlers
-	return b.registerRoute(field.IDName(), field.Name(), rvMessageHandler)
+	var (
+		moduleID = field.IDName()
+		topic    = field.Name()
+	)
+	return b.registerRoute(moduleID, topic, rvMessageHandler)
 }
 
 func (b *MessageManagerBinder) Deinit(context *structproto.StructProtoContext) error {

@@ -247,6 +247,7 @@ func TestStartup_UseTracing(t *testing.T) {
 
 func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 	var (
+		testStartAt   time.Time
 		loggingBuffer bytes.Buffer
 	)
 
@@ -276,6 +277,8 @@ func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 			t.Logf("%+v\n", app.Config)
 		})
 
+	testStartAt = time.Now()
+
 	runCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := starter.Start(runCtx); err != nil {
@@ -286,6 +289,51 @@ func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 	case <-runCtx.Done():
 		if err := starter.Stop(context.Background()); err != nil {
 			t.Error(err)
+		}
+
+		testEndAt := time.Now()
+
+		// wait 2 seconds
+		time.Sleep(2 * time.Second)
+
+		var queryUrl = fmt.Sprintf(
+			"%s?end=%d&limit=50&lookback=1h&&service=nsq-trace-demo&start=%d",
+			app.Config.JaegerQueryUrl,
+			testEndAt.UnixMicro(),
+			testStartAt.UnixMicro())
+
+		t.Log(queryUrl)
+		req, err := http.NewRequest("GET", queryUrl, nil)
+		if err != nil {
+			t.Error(err)
+		}
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if resp.StatusCode != 200 {
+			t.Errorf("assert query 'Jeager Query Url StatusCode':: expected '%v', got '%v'", 200, resp.StatusCode)
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Error(err)
+		}
+		// t.Logf("%v", string(body))
+		// parse content
+		{
+			var reply map[string]interface{}
+			dec := json.NewDecoder(bytes.NewBuffer(body))
+			dec.UseNumber()
+			if err := dec.Decode(&reply); err != nil {
+				t.Error(err)
+			}
+
+			data := reply["data"].([]interface{})
+			if data == nil {
+				t.Errorf("missing data section")
+			}
+			var expectedDataLength int = 14
+			if expectedDataLength != len(data) {
+				t.Errorf("assert 'Jaeger Query size of replies':: expected '%v', got '%v'", expectedDataLength, len(data))
+			}
 		}
 
 		// test loggingBuffer
