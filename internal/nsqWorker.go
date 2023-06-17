@@ -27,7 +27,6 @@ type NsqWorker struct {
 	messageDispatcher *MessageDispatcher
 	messageManager    interface{}
 
-	router               Router
 	messageHandleService *MessageHandleService
 	messageTracerService *MessageTracerService
 
@@ -97,14 +96,13 @@ func (w *NsqWorker) alloc() {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 
-	w.router = make(Router)
 	w.messageHandleService = NewMessageHandleService()
 	w.messageTracerService = NewMessageTracerService()
 
 	w.messageDispatcher = &MessageDispatcher{
 		MessageHandleService: w.messageHandleService,
 		MessageTracerService: w.messageTracerService,
-		Router:               w.router,
+		Router:               make(Router),
 	}
 }
 

@@ -31,5 +31,5 @@ func (r *NsqWorkerRegistrar) SetMessageManager(messageManager interface{}) {
 }
 
 func (r *NsqWorkerRegistrar) AddRouter(topic string, handler MessageHandler, handlerComponentID string) {
-	r.worker.router.Add(topic, handler, handlerComponentID)
+	r.worker.messageDispatcher.Router.Add(topic, handler, handlerComponentID)
 }
