@@ -135,6 +135,5 @@ func (h *Host) Init(conf *Config) {
 }
 
 func (h *Host) OnError(err error) (disposed bool) {
-	fmt.Printf("===== %v\n", err)
 	return false
 }
