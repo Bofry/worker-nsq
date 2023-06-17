@@ -43,6 +43,8 @@ type (
 	}
 
 	ErrorHandler func(ctx *Context, message *Message, err interface{})
+
+	OnHostErrorHandler func(err error) (disposed bool)
 )
 
 func createNoopTracerProvider() *trace.SeverityTracerProvider {

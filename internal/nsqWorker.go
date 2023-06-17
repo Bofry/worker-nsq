@@ -30,6 +30,8 @@ type NsqWorker struct {
 	messageHandleService *MessageHandleService
 	messageTracerService *MessageTracerService
 
+	onErrorEventHandler host.HostOnErrorEventHandler
+
 	wg          sync.WaitGroup
 	mutex       sync.Mutex
 	initialized bool
@@ -64,6 +66,8 @@ func (w *NsqWorker) Start(ctx context.Context) {
 		topics = w.messageDispatcher.Topics()
 	)
 
+	w.messageDispatcher.start(ctx)
+
 	NsqWorkerLogger.Printf("channel [%s] topics [%s] on address %s\n",
 		w.Channel,
 		strings.Join(topics, ","),
@@ -80,7 +84,15 @@ func (w *NsqWorker) Start(ctx context.Context) {
 
 func (w *NsqWorker) Stop(ctx context.Context) error {
 	NsqWorkerLogger.Printf("%% Stopping\n")
+
+	w.mutex.Lock()
 	defer func() {
+		w.running = false
+		w.disposed = true
+		w.mutex.Unlock()
+
+		w.messageDispatcher.stop(ctx)
+
 		NsqWorkerLogger.Printf("%% Stopped\n")
 	}()
 
@@ -103,6 +115,7 @@ func (w *NsqWorker) alloc() {
 		MessageHandleService: w.messageHandleService,
 		MessageTracerService: w.messageTracerService,
 		Router:               make(Router),
+		OnHostErrorProc:      w.onHostError,
 	}
 }
 
@@ -142,6 +155,13 @@ func (w *NsqWorker) receiveMessage(message *Message) error {
 		unhandledMessageHandler: nil, // be determined by MessageDispatcher
 	}
 	return w.messageDispatcher.ProcessMessage(ctx, message)
+}
+
+func (w *NsqWorker) onHostError(err error) (disposed bool) {
+	if w.onErrorEventHandler != nil {
+		return w.onErrorEventHandler.OnError(err)
+	}
+	return false
 }
 
 func (w *NsqWorker) setTextMapPropagator(propagator propagation.TextMapPropagator) {

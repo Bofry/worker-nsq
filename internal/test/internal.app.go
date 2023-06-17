@@ -133,3 +133,8 @@ func (h *Host) Init(conf *Config) {
 	h.HandlerConcurrency = conf.NsqHandlerConcurrency
 	h.Config = config
 }
+
+func (h *Host) OnError(err error) (disposed bool) {
+	fmt.Printf("===== %v\n", err)
+	return false
+}

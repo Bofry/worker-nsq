@@ -2,8 +2,6 @@ package internal
 
 import (
 	"context"
-
-	nsq "github.com/Bofry/lib-nsq"
 )
 
 var _ MessageHandleModule = new(StdMessageHandleModule)
@@ -29,7 +27,7 @@ func (*StdMessageHandleModule) SetSuccessor(successor MessageHandleModule) {
 }
 
 // ProcessMessage implements MessageHandleModule.
-func (m *StdMessageHandleModule) ProcessMessage(ctx *Context, message *nsq.Message, state ProcessingState, recover *Recover) error {
+func (m *StdMessageHandleModule) ProcessMessage(ctx *Context, message *Message, state ProcessingState, recover *Recover) error {
 	return m.dispatcher.internalProcessMessage(ctx, message, state, recover)
 }
 

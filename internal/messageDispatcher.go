@@ -15,6 +15,8 @@ type MessageDispatcher struct {
 	MessageTracerService *MessageTracerService
 	Router               Router
 
+	OnHostErrorProc OnHostErrorHandler
+
 	ErrorHandler            ErrorHandler
 	UnhandledMessageHandler MessageHandler
 }
@@ -129,7 +131,13 @@ func (d *MessageDispatcher) processError(ctx *Context, message *Message, err int
 func (d *MessageDispatcher) start(ctx context.Context) {
 	err := d.MessageHandleService.triggerStart(ctx)
 	if err != nil {
-		NsqWorkerLogger.Fatalf("%+v", err)
+		var disposed bool = false
+		if d.OnHostErrorProc != nil {
+			disposed = d.OnHostErrorProc(err)
+		}
+		if !disposed {
+			NsqWorkerLogger.Fatalf("%+v", err)
+		}
 	}
 }
 
