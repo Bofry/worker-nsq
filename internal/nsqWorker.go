@@ -61,12 +61,11 @@ func (w *NsqWorker) Start(ctx context.Context) {
 	}()
 
 	w.running = true
+	w.messageDispatcher.start(ctx)
 
 	var (
 		topics = w.messageDispatcher.Topics()
 	)
-
-	w.messageDispatcher.start(ctx)
 
 	NsqWorkerLogger.Printf("channel [%s] topics [%s] on address %s\n",
 		w.Channel,
@@ -97,6 +96,7 @@ func (w *NsqWorker) Stop(ctx context.Context) error {
 	}()
 
 	w.consumer.Close()
+	w.wg.Wait()
 	return nil
 }
 
