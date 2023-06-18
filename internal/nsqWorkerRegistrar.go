@@ -22,8 +22,8 @@ func (r *NsqWorkerRegistrar) SetErrorHandler(handler ErrorHandler) {
 	r.worker.messageDispatcher.ErrorHandler = handler
 }
 
-func (r *NsqWorkerRegistrar) SetUnhandledMessageHandler(handler MessageHandler) {
-	r.worker.messageDispatcher.UnhandledMessageHandler = handler
+func (r *NsqWorkerRegistrar) SetInvalidMessageHandler(handler MessageHandler) {
+	r.worker.messageDispatcher.InvalidMessageHandler = handler
 }
 
 func (r *NsqWorkerRegistrar) SetMessageManager(messageManager interface{}) {

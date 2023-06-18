@@ -14,9 +14,9 @@ type MessageTracerService struct {
 
 	Enabled bool
 
-	UnhandledMessageHandlerComponentID string
+	InvalidMessageHandlerComponentID string
 
-	unhandledMessageTracer *trace.SeverityTracer
+	invalidMessageTracer *trace.SeverityTracer
 
 	tracers            map[string]*trace.SeverityTracer
 	tracersInitializer sync.Once
@@ -32,7 +32,7 @@ func (s *MessageTracerService) Tracer(id string) *trace.SeverityTracer {
 			return tr
 		}
 	}
-	return s.unhandledMessageTracer
+	return s.invalidMessageTracer
 }
 
 func (s *MessageTracerService) init(messageManager interface{}) {
@@ -46,7 +46,7 @@ func (s *MessageTracerService) init(messageManager interface{}) {
 		s.makeTracerMap()
 		s.buildTracer(messageManager)
 	}
-	s.makeUnhandledMessageTracer()
+	s.makeInvalidMessageTracer()
 }
 
 func (s *MessageTracerService) makeTracerMap() {
@@ -97,7 +97,7 @@ func (s *MessageTracerService) registerTracer(id string, tracer *trace.SeverityT
 	}
 }
 
-func (s *MessageTracerService) makeUnhandledMessageTracer() {
+func (s *MessageTracerService) makeInvalidMessageTracer() {
 	var (
 		tp *trace.SeverityTracerProvider = defaultTracerProvider
 	)
@@ -106,12 +106,12 @@ func (s *MessageTracerService) makeUnhandledMessageTracer() {
 		tp = s.TracerProvider
 	}
 
-	if len(s.UnhandledMessageHandlerComponentID) > 0 {
-		v, ok := s.tracers[s.UnhandledMessageHandlerComponentID]
+	if len(s.InvalidMessageHandlerComponentID) > 0 {
+		v, ok := s.tracers[s.InvalidMessageHandlerComponentID]
 		if ok {
-			s.unhandledMessageTracer = v
+			s.invalidMessageTracer = v
 			return
 		}
 	}
-	s.unhandledMessageTracer = tp.Tracer("")
+	s.invalidMessageTracer = tp.Tracer("")
 }

@@ -13,6 +13,24 @@ import (
 
 const (
 	LOGGER_PREFIX string = "[worker-nsq] "
+
+	__CONTEXT_REPLY_KEY ctxReplyKeyType = 0
+
+	__ATTR_ATTEMPTS = "attempts"
+)
+
+const (
+	UNSET ReplyCode = iota
+	PASS
+	FAIL
+	ABORT
+
+	__reply_code_minimum__ = UNSET
+	__reply_code_maximum__ = ABORT
+
+	INVALID ReplyCode = -1
+
+	__reply_code_invalid_text__ = "invalid"
 )
 
 var (
@@ -20,12 +38,16 @@ var (
 	defaultTracerProvider    = createNoopTracerProvider()
 	defaultTextMapPropagator = createNoopTextMapPropagator()
 
+	GlobalContextHelper = ContextHelper{}
+
 	NsqWorkerModuleInstance = NsqWorkerModule{}
 
 	NsqWorkerLogger *log.Logger = log.New(os.Stdout, LOGGER_PREFIX, log.LstdFlags|log.Lmsgprefix)
 )
 
 type (
+	ctxReplyKeyType int
+
 	Config  = nsq.Config
 	Message = nsq.Message
 

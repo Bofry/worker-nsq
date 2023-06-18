@@ -30,18 +30,18 @@ type BlackholeEventLog struct {
 	buffer *bytes.Buffer
 }
 
-func (l *BlackholeEventLog) LogError(message *nsq.Message, err interface{}, stackTrace []byte) {
+func (l *BlackholeEventLog) OnError(message *nsq.Message, err interface{}, stackTrace []byte) {
 	l.buffer.WriteString("LogError()")
 	l.buffer.WriteByte('\n')
 }
 
-func (l *BlackholeEventLog) AfterProcessMessage(message *nsq.Message) {
-	l.buffer.WriteString("AfterProcessMessage()")
+func (l *BlackholeEventLog) OnProcessMessageComplete(message *nsq.Message, reply nsq.ReplyCode) {
+	l.buffer.WriteString("OnProcessMessageComplete()")
 	l.buffer.WriteByte('\n')
 }
 
-func (l *BlackholeEventLog) BeforeProcessMessage(message *nsq.Message) {
-	l.buffer.WriteString("BeforeProcessMessage()")
+func (l *BlackholeEventLog) OnProcessMessage(message *nsq.Message) {
+	l.buffer.WriteString("OnProcessMessage()")
 	l.buffer.WriteByte('\n')
 }
 

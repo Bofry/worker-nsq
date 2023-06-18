@@ -6,6 +6,14 @@ import (
 	"github.com/Bofry/worker-nsq/internal/middleware"
 )
 
+const (
+	INVALID = internal.INVALID
+	UNSET   = internal.UNSET
+	PASS    = internal.PASS
+	FAIL    = internal.FAIL
+	ABORT   = internal.ABORT
+)
+
 type (
 	ProducerConfig = nsq.ProducerConfig
 	Producer       = nsq.Producer
@@ -21,6 +29,7 @@ type (
 	MessageHandler = internal.MessageHandler
 	Worker         = internal.NsqWorker
 	Context        = internal.Context
+	ReplyCode      = internal.ReplyCode
 
 	ErrorHandler = internal.ErrorHandler
 )

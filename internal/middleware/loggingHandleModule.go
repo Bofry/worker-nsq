@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 
 	nsq "github.com/Bofry/lib-nsq"
+	"github.com/Bofry/worker-nsq/internal"
 	. "github.com/Bofry/worker-nsq/internal"
 )
 
@@ -35,21 +36,25 @@ func (m *LoggingHandleModule) ProcessMessage(ctx *Context, message *nsq.Message,
 		}
 
 		eventLog := m.loggingService.CreateEventLog(evidence)
-		eventLog.BeforeProcessMessage(message)
+		eventLog.OnProcessMessage(message)
 
 		return recover.
 			Defer(func(err interface{}) {
 				if err != nil {
 					defer func() {
-						eventLog.LogError(message, err, debug.Stack())
+						eventLog.OnError(message, err, debug.Stack())
 						eventLog.Flush()
 					}()
 
 					// NOTE: we should not handle error here, due to the underlying RequestHandler
 					// will handle it.
 				} else {
-					eventLog.AfterProcessMessage(message)
-					eventLog.Flush()
+					var (
+						reply ReplyCode = internal.GlobalContextHelper.ExtractReplyCode(ctx)
+					)
+					defer eventLog.Flush()
+
+					eventLog.OnProcessMessageComplete(message, reply)
 				}
 			}).
 			Do(func(f Finalizer) error {

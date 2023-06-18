@@ -20,7 +20,7 @@ func (proc MessageHandleProc) ProcessMessage(ctx *Context, message *Message) err
 var _ MessageHandleProc = StopRecursiveForwardMessageHandler
 
 func StopRecursiveForwardMessageHandler(ctx *Context, msg *Message) error {
-	ctx.logger.Fatal("invalid forward; it might be recursive forward message to UnhandledMessageHandler")
+	ctx.logger.Fatal("invalid forward; it might be recursive forward message to InvalidMessageHandler")
 	return nil
 }
 
@@ -32,9 +32,10 @@ var (
 type Context struct {
 	Channel string
 
-	logger *log.Logger
+	context context.Context
+	logger  *log.Logger
 
-	unhandledMessageHandler MessageHandler
+	invalidMessageHandler MessageHandler
 
 	values     map[interface{}]interface{}
 	valuesOnce sync.Once
@@ -63,6 +64,9 @@ func (c *Context) Value(key interface{}) interface{} {
 	if c.values != nil {
 		return c.values[key]
 	}
+	if c.context != nil {
+		return c.context.Value(key)
+	}
 	return nil
 }
 
@@ -81,13 +85,23 @@ func (c *Context) SetValue(key, value interface{}) {
 	c.values[key] = value
 }
 
-func (c *Context) ForwardUnhandledMessage(message *Message) error {
-	if c.unhandledMessageHandler != nil {
+func (c *Context) ThrowInvalidMessageError(message *Message) error {
+	GlobalContextHelper.InjectReplyCode(c, ABORT)
+
+	if c.invalidMessageHandler != nil {
+		var (
+			sp = trace.SpanFromContext(c)
+		)
+
 		ctx := &Context{
-			logger:                  c.logger,
-			unhandledMessageHandler: MessageHandleProc(StopRecursiveForwardMessageHandler),
+			logger:                c.logger,
+			values:                c.values,
+			context:               sp.Context(),
+			invalidMessageHandler: MessageHandleProc(StopRecursiveForwardMessageHandler),
 		}
-		return c.unhandledMessageHandler.ProcessMessage(ctx, message)
+
+		err := c.invalidMessageHandler.ProcessMessage(ctx, message)
+		_ = err // we won't process the error on InvalidMessageHandler
 	}
 	return nil
 }

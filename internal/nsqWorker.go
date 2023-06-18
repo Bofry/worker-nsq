@@ -150,10 +150,15 @@ func (w *NsqWorker) configConsumer() {
 
 func (w *NsqWorker) receiveMessage(message *Message) error {
 	ctx := &Context{
-		Channel:                 w.Channel,
-		logger:                  w.logger,
-		unhandledMessageHandler: nil, // be determined by MessageDispatcher
+		Channel:               w.Channel,
+		logger:                w.logger,
+		invalidMessageHandler: nil, // be determined by MessageDispatcher
 	}
+
+	// configure nsq.MessageDelegate
+	delegate := NewContextMessageDelegate(ctx)
+	delegate.configure(message.Message)
+
 	return w.messageDispatcher.ProcessMessage(ctx, message)
 }
 

@@ -70,9 +70,8 @@ func (b *MessageManagerBinder) registerRoute(moduleID, topic string, rv reflect.
 	if isMessageHandler(rv) {
 		handler := asMessageHandler(rv)
 		if handler != nil {
-			if topic == UNHANDLED_MESSAGE_HANDLER_TOPIC_SYMBOL {
-				// TODO: lack of moduleID ?
-				b.registrar.SetUnhandledMessageHandler(handler)
+			if topic == INVALID_MESSAGE_HANDLER_TOPIC_SYMBOL {
+				b.registrar.SetInvalidMessageHandler(handler)
 			} else {
 				// TODO: validate topic name comply NSQ topic spec
 				b.registrar.AddRouter(topic, handler, moduleID)

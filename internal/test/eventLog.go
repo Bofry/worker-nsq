@@ -15,21 +15,21 @@ type EventLog struct {
 }
 
 // AfterProcessMessage implements middleware.EventLog.
-func (l EventLog) AfterProcessMessage(message *nsq.Message) {
+func (l EventLog) OnProcessMessageComplete(message *nsq.Message, reply nsq.ReplyCode) {
 	traceID := fmt.Sprintf("%s-%s",
 		l.evidence.ProcessingSpanID(),
 		l.evidence.ProcessingSpanID())
 
-	l.logger.Printf("EventLog.AfterProcessMessage(): (%s) %s\n", traceID, string(message.ID[:]))
+	l.logger.Printf("EventLog.OnProcessMessageComplete(): (%s) %s\n", traceID, string(message.ID[:]))
 }
 
 // BeforeProcessMessage implements middleware.EventLog.
-func (l EventLog) BeforeProcessMessage(message *nsq.Message) {
+func (l EventLog) OnProcessMessage(message *nsq.Message) {
 	traceID := fmt.Sprintf("%s-%s",
 		l.evidence.ProcessingSpanID(),
 		l.evidence.ProcessingSpanID())
 
-	l.logger.Printf("EventLog.BeforeProcessMessage(): (%s) %s\n", traceID, string(message.ID[:]))
+	l.logger.Printf("EventLog.OnProcessMessage(): (%s) %s\n", traceID, string(message.ID[:]))
 }
 
 // Flush implements middleware.EventLog.
@@ -38,6 +38,6 @@ func (l EventLog) Flush() {
 }
 
 // LogError implements middleware.EventLog.
-func (l EventLog) LogError(message *nsq.Message, err interface{}, stackTrace []byte) {
-	l.logger.Printf("EventLog.WriteError(): %v\n", err)
+func (l EventLog) OnError(message *nsq.Message, err interface{}, stackTrace []byte) {
+	l.logger.Printf("EventLog.OnError(): %v\n", err)
 }

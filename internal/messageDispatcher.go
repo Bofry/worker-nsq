@@ -17,8 +17,8 @@ type MessageDispatcher struct {
 
 	OnHostErrorProc OnHostErrorHandler
 
-	ErrorHandler            ErrorHandler
-	UnhandledMessageHandler MessageHandler
+	ErrorHandler          ErrorHandler
+	InvalidMessageHandler MessageHandler
 }
 
 func (d *MessageDispatcher) Topics() []string {
@@ -61,8 +61,8 @@ func (d *MessageDispatcher) ProcessMessage(ctx *Context, message *Message) error
 		Span:   sp,
 	}
 
-	// set unhandledMessageHandler
-	ctx.unhandledMessageHandler = d.UnhandledMessageHandler
+	// set invalidMessageHandler
+	ctx.invalidMessageHandler = d.InvalidMessageHandler
 
 	return d.MessageHandleService.ProcessMessage(ctx, message, processingState, new(Recover))
 }
@@ -97,6 +97,17 @@ func (d *MessageDispatcher) internalProcessMessage(ctx *Context, message *Messag
 						sp.Err(fmt.Errorf("%+v", err))
 					}
 				}
+
+				var (
+					reply = GlobalContextHelper.ExtractReplyCode(ctx)
+				)
+
+				switch reply {
+				case PASS:
+					sp.Reply(trace.PASS, reply)
+				case FAIL, ABORT:
+					sp.Reply(trace.FAIL, reply)
+				}
 			})
 
 			sp.Tags(
@@ -105,14 +116,21 @@ func (d *MessageDispatcher) internalProcessMessage(ctx *Context, message *Messag
 				trace.ConsumerGroup(ctx.Channel),
 				trace.BrokerIP(message.NSQDAddress),
 				trace.MessageID(string(message.ID[:])),
-				trace.Key("attempts").Int(int(message.Attempts)),
+				trace.Key(__ATTR_ATTEMPTS).Int(int(message.Attempts)),
 			)
 
 			handler := d.Router.Get(topic)
 			if handler != nil {
-				return handler.ProcessMessage(ctx, message)
+				err := handler.ProcessMessage(ctx, message)
+				if err == nil {
+					reply := GlobalContextHelper.ExtractReplyCode(ctx)
+					if reply == UNSET {
+						GlobalContextHelper.InjectReplyCode(ctx, PASS)
+					}
+				}
+				return err
 			}
-			return ctx.ForwardUnhandledMessage(message)
+			return ctx.ThrowInvalidMessageError(message)
 		})
 }
 

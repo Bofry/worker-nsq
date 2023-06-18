@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	UNHANDLED_MESSAGE_HANDLER_TOPIC_SYMBOL string = "?"
+	INVALID_MESSAGE_HANDLER_TOPIC_SYMBOL string = "?"
 
 	TAG_TOPIC = "topic"
 )
@@ -19,17 +19,15 @@ var (
 )
 
 type (
-	ConfigureUnhandledMessageHandleProc func(handler internal.MessageHandler)
-
 	LoggingService interface {
 		CreateEventLog(ev EventEvidence) EventLog
 		ConfigureLogger(l *log.Logger)
 	}
 
 	EventLog interface {
-		BeforeProcessMessage(message *internal.Message)
-		LogError(message *internal.Message, err interface{}, stackTrace []byte)
-		AfterProcessMessage(message *internal.Message)
+		OnError(message *internal.Message, err interface{}, stackTrace []byte)
+		OnProcessMessage(message *internal.Message)
+		OnProcessMessageComplete(message *internal.Message, reply internal.ReplyCode)
 		Flush()
 	}
 )

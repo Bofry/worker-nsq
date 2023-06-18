@@ -42,23 +42,23 @@ func (l MultiEventLog) Flush() {
 	}
 }
 
-// LogError implements middleware.EventLog.
-func (l MultiEventLog) LogError(message *nsq.Message, err interface{}, stackTrace []byte) {
+// OnError implements middleware.EventLog.
+func (l MultiEventLog) OnError(message *nsq.Message, err interface{}, stackTrace []byte) {
 	for _, log := range l.EventLogs {
-		log.LogError(message, err, stackTrace)
+		log.OnError(message, err, stackTrace)
 	}
 }
 
-// AfterProcessMessage implements middleware.EventLog.
-func (l MultiEventLog) AfterProcessMessage(message *nsq.Message) {
+// OnProcessMessageComplete implements middleware.EventLog.
+func (l MultiEventLog) OnProcessMessageComplete(message *nsq.Message, reply nsq.ReplyCode) {
 	for _, log := range l.EventLogs {
-		log.AfterProcessMessage(message)
+		log.OnProcessMessageComplete(message, reply)
 	}
 }
 
-// BeforeProcessMessage implements middleware.EventLog.
-func (l MultiEventLog) BeforeProcessMessage(message *nsq.Message) {
+// OnProcessMessage implements middleware.EventLog.
+func (l MultiEventLog) OnProcessMessage(message *nsq.Message) {
 	for _, log := range l.EventLogs {
-		log.BeforeProcessMessage(message)
+		log.OnProcessMessage(message)
 	}
 }
