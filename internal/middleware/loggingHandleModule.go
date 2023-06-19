@@ -6,13 +6,12 @@ import (
 
 	nsq "github.com/Bofry/lib-nsq"
 	"github.com/Bofry/worker-nsq/internal"
-	. "github.com/Bofry/worker-nsq/internal"
 )
 
-var _ MessageHandleModule = new(LoggingHandleModule)
+var _ internal.MessageHandleModule = new(LoggingHandleModule)
 
 type LoggingHandleModule struct {
-	successor      MessageHandleModule
+	successor      internal.MessageHandleModule
 	loggingService LoggingService
 }
 
@@ -22,12 +21,12 @@ func (*LoggingHandleModule) CanSetSuccessor() bool {
 }
 
 // SetSuccessor implements internal.MessageHandleModule.
-func (m *LoggingHandleModule) SetSuccessor(successor MessageHandleModule) {
+func (m *LoggingHandleModule) SetSuccessor(successor internal.MessageHandleModule) {
 	m.successor = successor
 }
 
 // ProcessMessage implements internal.MessageHandleModule.
-func (m *LoggingHandleModule) ProcessMessage(ctx *Context, message *nsq.Message, state ProcessingState, recover *Recover) error {
+func (m *LoggingHandleModule) ProcessMessage(ctx *internal.Context, message *nsq.Message, state internal.ProcessingState, recover *internal.Recover) error {
 	if m.successor != nil {
 		evidence := EventEvidence{
 			traceID: state.Span.TraceID(),
@@ -50,14 +49,14 @@ func (m *LoggingHandleModule) ProcessMessage(ctx *Context, message *nsq.Message,
 					// will handle it.
 				} else {
 					var (
-						reply ReplyCode = internal.GlobalContextHelper.ExtractReplyCode(ctx)
+						reply internal.ReplyCode = internal.GlobalContextHelper.ExtractReplyCode(ctx)
 					)
 					defer eventLog.Flush()
 
 					eventLog.OnProcessMessageComplete(message, reply)
 				}
 			}).
-			Do(func(f Finalizer) error {
+			Do(func(f internal.Finalizer) error {
 				return m.successor.ProcessMessage(ctx, message, state, recover)
 			})
 	}

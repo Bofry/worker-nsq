@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Bofry/host"
 	"github.com/Bofry/trace"
 	nsq "github.com/Bofry/worker-nsq"
 	"go.opentelemetry.io/otel/propagation"
@@ -13,6 +14,12 @@ import (
 
 var (
 	defaultLogger *log.Logger = log.New(log.Writer(), "[worker-nsq-test] ", log.LstdFlags|log.Lmsgprefix|log.LUTC)
+)
+
+var (
+	_ host.App                    = new(App)
+	_ host.AppStaterConfigurator  = new(App)
+	_ host.AppTracingConfigurator = new(App)
 )
 
 type (
@@ -43,7 +50,7 @@ type (
 	}
 )
 
-func (app *App) Init(conf *Config) {
+func (app *App) Init() {
 	fmt.Println("App.Init()")
 
 	app.Component = &MockComponent{}
