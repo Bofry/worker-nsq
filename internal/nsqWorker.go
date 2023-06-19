@@ -30,6 +30,8 @@ type NsqWorker struct {
 	messageHandleService *MessageHandleService
 	messageTracerService *MessageTracerService
 
+	tracerManager *TracerManager
+
 	onErrorEventHandler host.HostOnErrorEventHandler
 
 	wg          sync.WaitGroup
@@ -108,8 +110,11 @@ func (w *NsqWorker) alloc() {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 
+	w.tracerManager = NewTraceManager()
 	w.messageHandleService = NewMessageHandleService()
-	w.messageTracerService = NewMessageTracerService()
+	w.messageTracerService = &MessageTracerService{
+		TracerManager: w.tracerManager,
+	}
 
 	w.messageDispatcher = &MessageDispatcher{
 		MessageHandleService: w.messageHandleService,
@@ -117,6 +122,9 @@ func (w *NsqWorker) alloc() {
 		Router:               make(Router),
 		OnHostErrorProc:      w.onHostError,
 	}
+
+	// register TracerManager
+	GlobalTracerManager = w.tracerManager
 }
 
 func (w *NsqWorker) init() {
@@ -170,11 +178,11 @@ func (w *NsqWorker) onHostError(err error) (disposed bool) {
 }
 
 func (w *NsqWorker) setTextMapPropagator(propagator propagation.TextMapPropagator) {
-	w.messageTracerService.TextMapPropagator = propagator
+	w.tracerManager.TextMapPropagator = propagator
 }
 
 func (w *NsqWorker) setTracerProvider(provider *trace.SeverityTracerProvider) {
-	w.messageTracerService.TracerProvider = provider
+	w.tracerManager.TracerProvider = provider
 }
 
 func (w *NsqWorker) setLogger(l *log.Logger) {

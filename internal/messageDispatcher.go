@@ -50,7 +50,7 @@ func (d *MessageDispatcher) ProcessMessage(ctx *Context, message *Message) error
 	tr = d.MessageTracerService.Tracer(componentID)
 	sp = tr.ExtractWithPropagator(
 		ctx,
-		d.MessageTracerService.TextMapPropagator,
+		d.MessageTracerService.TextMapPropagator(),
 		carrier,
 		spanName)
 	defer sp.End()

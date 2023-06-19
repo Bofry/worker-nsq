@@ -9,8 +9,7 @@ import (
 )
 
 type MessageTracerService struct {
-	TracerProvider    *trace.SeverityTracerProvider
-	TextMapPropagator propagation.TextMapPropagator
+	TracerManager *TracerManager
 
 	Enabled bool
 
@@ -22,10 +21,6 @@ type MessageTracerService struct {
 	tracersInitializer sync.Once
 }
 
-func NewMessageTracerService() *MessageTracerService {
-	return &MessageTracerService{}
-}
-
 func (s *MessageTracerService) Tracer(id string) *trace.SeverityTracer {
 	if s.tracers != nil {
 		if tr, ok := s.tracers[id]; ok {
@@ -35,13 +30,11 @@ func (s *MessageTracerService) Tracer(id string) *trace.SeverityTracer {
 	return s.invalidMessageTracer
 }
 
+func (s *MessageTracerService) TextMapPropagator() propagation.TextMapPropagator {
+	return s.TracerManager.TextMapPropagator
+}
+
 func (s *MessageTracerService) init(messageManager interface{}) {
-	if s.TextMapPropagator == nil {
-		s.TextMapPropagator = defaultTextMapPropagator
-	}
-	if s.TracerProvider == nil {
-		s.TracerProvider = defaultTracerProvider
-	}
 	if s.Enabled {
 		s.makeTracerMap()
 		s.buildTracer(messageManager)
@@ -73,10 +66,7 @@ func (s *MessageTracerService) buildTracer(requestManager interface{}) {
 
 		rvRequest = reflect.Indirect(rvRequest)
 		if rvRequest.Kind() == reflect.Struct {
-			rvRequest = reflect.Indirect(rvRequest)
-
-			componentName := rvRequest.Type().Name()
-			tracer := s.TracerProvider.Tracer(componentName)
+			tracer := s.TracerManager.createManagedTracer(rvRequest.Type())
 
 			info := rvManager.Type().Field(i)
 			if _, ok := s.tracers[info.Name]; !ok {
@@ -98,14 +88,6 @@ func (s *MessageTracerService) registerTracer(id string, tracer *trace.SeverityT
 }
 
 func (s *MessageTracerService) makeInvalidMessageTracer() {
-	var (
-		tp *trace.SeverityTracerProvider = defaultTracerProvider
-	)
-
-	if s.Enabled {
-		tp = s.TracerProvider
-	}
-
 	if len(s.InvalidMessageHandlerComponentID) > 0 {
 		v, ok := s.tracers[s.InvalidMessageHandlerComponentID]
 		if ok {
@@ -113,5 +95,5 @@ func (s *MessageTracerService) makeInvalidMessageTracer() {
 			return
 		}
 	}
-	s.invalidMessageTracer = tp.Tracer("")
+	s.invalidMessageTracer = s.TracerManager.createTracer("")
 }

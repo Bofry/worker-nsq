@@ -38,7 +38,8 @@ var (
 	defaultTracerProvider    = createNoopTracerProvider()
 	defaultTextMapPropagator = createNoopTextMapPropagator()
 
-	GlobalContextHelper = ContextHelper{}
+	GlobalTracerManager *TracerManager // be register from NsqWorker
+	GlobalContextHelper ContextHelper  = ContextHelper{}
 
 	NsqWorkerModuleInstance = NsqWorkerModule{}
 
