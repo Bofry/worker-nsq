@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Bofry/trace"
 	nsq "github.com/Bofry/worker-nsq"
@@ -17,13 +18,13 @@ type GoTestTopicMessageHandler struct {
 }
 
 func (h *GoTestTopicMessageHandler) Init() {
-	defaultLogger.Printf("GoTestTopicMessageHandler.Init()")
+	fmt.Println("GoTestTopicMessageHandler.Init()")
 
 	h.counter = new(GoTestTopicMessageCounter)
 }
 
 func (h *GoTestTopicMessageHandler) ProcessMessage(ctx *nsq.Context, message *nsq.Message) error {
-	defaultLogger.Printf("Message on %s (%s): [%s] %v\n", message.Topic, message.NSQDAddress, message.ID, string(message.Body))
+	ctx.Logger().Printf("Message on %s (%s): [%s] %v\n", message.Topic, message.NSQDAddress, message.ID, string(message.Body))
 
 	sp := trace.SpanFromContext(ctx)
 	sp.Argv(string(message.Body))

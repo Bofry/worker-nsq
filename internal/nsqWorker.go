@@ -178,11 +178,11 @@ func (w *NsqWorker) onHostError(err error) (disposed bool) {
 }
 
 func (w *NsqWorker) setTextMapPropagator(propagator propagation.TextMapPropagator) {
-	w.tracerManager.TextMapPropagator = propagator
+	w.messageTracerService.textMapPropagator = propagator
 }
 
 func (w *NsqWorker) setTracerProvider(provider *trace.SeverityTracerProvider) {
-	w.tracerManager.TracerProvider = provider
+	w.messageTracerService.tracerProvider = provider
 }
 
 func (w *NsqWorker) setLogger(l *log.Logger) {

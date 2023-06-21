@@ -125,7 +125,7 @@ func (d *MessageDispatcher) internalProcessMessage(ctx *Context, message *Messag
 				if err == nil {
 					reply := GlobalContextHelper.ExtractReplyCode(ctx)
 					if reply == UNSET {
-						GlobalContextHelper.InjectReplyCode(ctx, PASS)
+						message.Finish()
 					}
 				}
 				return err
