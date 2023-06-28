@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/Bofry/host"
@@ -46,6 +47,14 @@ func (b *MessageManagerBinder) Bind(field structproto.FieldInfo, rv reflect.Valu
 		moduleID = field.IDName()
 		topic    = field.Name()
 	)
+
+	if !b.isKnownStream(topic) {
+		optExpandEnv := field.Tag().Get(TAG_OPT_EXPAND_ENV)
+		if optExpandEnv != "off" || len(optExpandEnv) == 0 || optExpandEnv == "on" {
+			topic = os.ExpandEnv(topic)
+		}
+	}
+
 	return b.registerRoute(moduleID, topic, rvMessageHandler)
 }
 
@@ -79,4 +88,12 @@ func (b *MessageManagerBinder) registerRoute(moduleID, topic string, rv reflect.
 		}
 	}
 	return nil
+}
+
+func (b *MessageManagerBinder) isKnownStream(stream string) bool {
+	switch stream {
+	case INVALID_MESSAGE_HANDLER_TOPIC_SYMBOL:
+		return true
+	}
+	return false
 }

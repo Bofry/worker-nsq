@@ -10,7 +10,8 @@ import (
 const (
 	INVALID_MESSAGE_HANDLER_TOPIC_SYMBOL string = "?"
 
-	TAG_TOPIC = "topic"
+	TAG_TOPIC          = "topic"
+	TAG_OPT_EXPAND_ENV = "@ExpandEnv"
 )
 
 var (
