@@ -12,6 +12,8 @@ const (
 
 	TAG_TOPIC          = "topic"
 	TAG_OPT_EXPAND_ENV = "@ExpandEnv"
+	OPT_ON             = "on"
+	OPT_OFF            = "off"
 )
 
 var (

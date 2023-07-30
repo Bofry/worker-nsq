@@ -44,7 +44,7 @@ func (b *MessageHandlerBinder) preformInitMethod(context *structproto.StructProt
 	rv := context.Target()
 	if rv.CanAddr() {
 		rv = rv.Addr()
-		// call resource.Init()
+		// call MessageHandler.Init()
 		fn := rv.MethodByName(host.APP_COMPONENT_INIT_METHOD)
 		if fn.IsValid() {
 			if fn.Kind() != reflect.Func {

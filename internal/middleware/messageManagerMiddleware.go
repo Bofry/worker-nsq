@@ -18,10 +18,10 @@ func (m *MessageManagerMiddleware) Init(app *host.AppModule) {
 		registrar = NewNsqWorkerRegistrar(worker)
 	)
 
-	// register RequestManager offer FasthttpHost processing later.
+	// register MessageManager offer NsqWorker processing later.
 	registrar.SetMessageManager(m.MessageManager)
 
-	// binding MessageManage
+	// binding MessageManager
 	binder := &MessageManagerBinder{
 		registrar: registrar,
 		app:       app,

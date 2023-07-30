@@ -31,7 +31,7 @@ func (h *GoTestTopicMessageHandler) ProcessMessage(ctx *nsq.Context, message *ns
 
 	if message.Topic == "gotest2Topic" {
 		h.doSomething(sp.Context())
-		return ctx.ThrowInvalidMessageError(message)
+		return ctx.InvalidMessage(message)
 	}
 	h.counter.increase(sp.Context())
 	return nil

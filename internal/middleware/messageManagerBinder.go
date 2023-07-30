@@ -50,7 +50,7 @@ func (b *MessageManagerBinder) Bind(field structproto.FieldInfo, rv reflect.Valu
 
 	if !b.isKnownStream(topic) {
 		optExpandEnv := field.Tag().Get(TAG_OPT_EXPAND_ENV)
-		if optExpandEnv != "off" || len(optExpandEnv) == 0 || optExpandEnv == "on" {
+		if optExpandEnv != OPT_OFF || len(optExpandEnv) == 0 || optExpandEnv == OPT_ON {
 			topic = os.ExpandEnv(topic)
 		}
 	}

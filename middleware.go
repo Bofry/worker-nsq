@@ -27,7 +27,7 @@ func UseLogging(service LoggingService) host.Middleware {
 
 func UseMessageManager(messageManager interface{}) host.Middleware {
 	if messageManager == nil {
-		panic("argument 'topicGateway' cannot be nil")
+		panic("argument 'messageManager' cannot be nil")
 	}
 
 	return &middleware.MessageManagerMiddleware{

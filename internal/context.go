@@ -62,7 +62,10 @@ func (c *Context) Value(key interface{}) interface{} {
 		return nil
 	}
 	if c.values != nil {
-		return c.values[key]
+		v := c.values[key]
+		if v != nil {
+			return v
+		}
 	}
 	if c.context != nil {
 		return c.context.Value(key)
@@ -89,7 +92,7 @@ func (c *Context) Logger() *log.Logger {
 	return c.logger
 }
 
-func (c *Context) ThrowInvalidMessageError(message *Message) error {
+func (c *Context) InvalidMessage(message *Message) error {
 	GlobalContextHelper.InjectReplyCode(c, ABORT)
 
 	if c.invalidMessageHandler != nil {

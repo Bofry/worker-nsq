@@ -38,6 +38,10 @@ func (s *MessageTracerService) TextMapPropagator() propagation.TextMapPropagator
 }
 
 func (s *MessageTracerService) init(messageManager interface{}) {
+	if messageManager == nil {
+		return
+	}
+
 	if s.Enabled {
 		if s.tracerProvider != nil {
 			s.TracerManager.TracerProvider = s.tracerProvider
@@ -58,9 +62,9 @@ func (s *MessageTracerService) makeTracerMap() {
 	})
 }
 
-func (s *MessageTracerService) buildTracer(requestManager interface{}) {
+func (s *MessageTracerService) buildTracer(messageManager interface{}) {
 	var (
-		rvManager reflect.Value = reflect.ValueOf(requestManager)
+		rvManager reflect.Value = reflect.ValueOf(messageManager)
 	)
 	if rvManager.Kind() != reflect.Pointer || rvManager.IsNil() {
 		return
@@ -69,14 +73,14 @@ func (s *MessageTracerService) buildTracer(requestManager interface{}) {
 	rvManager = reflect.Indirect(rvManager)
 	numOfHandles := rvManager.NumField()
 	for i := 0; i < numOfHandles; i++ {
-		rvRequest := rvManager.Field(i)
-		if rvRequest.Kind() != reflect.Pointer || rvRequest.IsNil() {
+		rvHandler := rvManager.Field(i)
+		if rvHandler.Kind() != reflect.Pointer || rvHandler.IsNil() {
 			continue
 		}
 
-		rvRequest = reflect.Indirect(rvRequest)
-		if rvRequest.Kind() == reflect.Struct {
-			tracer := s.TracerManager.createManagedTracer(rvRequest.Type())
+		rvHandler = reflect.Indirect(rvHandler)
+		if rvHandler.Kind() == reflect.Struct {
+			tracer := s.TracerManager.createManagedTracer(rvHandler.Type())
 
 			info := rvManager.Type().Field(i)
 			if _, ok := s.tracers[info.Name]; !ok {
