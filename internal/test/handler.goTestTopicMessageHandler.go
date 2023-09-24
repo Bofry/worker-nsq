@@ -3,13 +3,17 @@ package test
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/Bofry/trace"
 	nsq "github.com/Bofry/worker-nsq"
 	"github.com/Bofry/worker-nsq/tracing"
 )
 
-var _ nsq.MessageHandler = new(GoTestTopicMessageHandler)
+var (
+	_ nsq.MessageHandler        = new(GoTestTopicMessageHandler)
+	_ nsq.MessageObserverAffair = new(GoTestTopicMessageHandler)
+)
 
 type GoTestTopicMessageHandler struct {
 	ServiceProvider *ServiceProvider
@@ -34,7 +38,16 @@ func (h *GoTestTopicMessageHandler) ProcessMessage(ctx *nsq.Context, message *ns
 		return ctx.InvalidMessage(message)
 	}
 	h.counter.increase(sp.Context())
+
+	// NOTE: the parent ProcessMessage will call message.Finish() automatically
 	return nil
+}
+
+// MessageObserverTypes implements internal.MessageObserverAffair.
+func (*GoTestTopicMessageHandler) MessageObserverTypes() []reflect.Type {
+	return []reflect.Type{
+		MessageObserverManager.GoTestStreamMessageObserver.Type(),
+	}
 }
 
 func (h *GoTestTopicMessageHandler) doSomething(ctx context.Context) {

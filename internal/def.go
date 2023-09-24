@@ -33,13 +33,21 @@ const (
 	__reply_code_invalid_text__ = "invalid"
 )
 
-var (
-	typeOfHost               = reflect.TypeOf(NsqWorker{})
-	defaultTracerProvider    = createNoopTracerProvider()
-	defaultTextMapPropagator = createNoopTextMapPropagator()
+const (
+	RestrictedForwardMessage_InvalidOperation int = 0
+	RestrictedForwardMessage_Recursive        int = 1
+)
 
-	GlobalTracerManager *TracerManager // be register from NsqWorker
-	GlobalContextHelper ContextHelper  = ContextHelper{}
+var (
+	typeOfHost                  = reflect.TypeOf(NsqWorker{})
+	typeOfMessageObserverAffair = reflect.TypeOf((*MessageObserverAffair)(nil)).Elem()
+	defaultTracerProvider       = createNoopTracerProvider()
+	defaultTextMapPropagator    = createNoopTextMapPropagator()
+	defaultMessageDelegate      = NoopMessageDelegate(0)
+
+	GlobalTracerManager             *TracerManager      // be register from NsqWorker
+	GlobalContextHelper             ContextHelper       = ContextHelper{}
+	GlobalRestrictedMessageDelegate nsq.MessageDelegate = RestrictedMessageDelegate(0)
 
 	NsqWorkerModuleInstance = NsqWorkerModule{}
 
@@ -59,6 +67,17 @@ type (
 		OnInitComplete()
 		OnStart(ctx context.Context) error
 		OnStop(ctx context.Context) error
+	}
+
+	MessageObserver interface {
+		OnFinish(ctx *Context, message *Message)
+		OnRequeue(ctx *Context, message *Message)
+		OnTouch(ctx *Context, message *Message)
+		Type() reflect.Type
+	}
+
+	MessageObserverAffair interface {
+		MessageObserverTypes() []reflect.Type
 	}
 
 	MessageHandler interface {

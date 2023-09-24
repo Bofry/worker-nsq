@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"log"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -27,8 +28,9 @@ type NsqWorker struct {
 	messageDispatcher *MessageDispatcher
 	messageManager    interface{}
 
-	messageHandleService *MessageHandleService
-	messageTracerService *MessageTracerService
+	messageHandleService   *MessageHandleService
+	messageTracerService   *MessageTracerService
+	messageObserverService *MessageObserverService
 
 	tracerManager *TracerManager
 
@@ -115,12 +117,16 @@ func (w *NsqWorker) alloc() {
 	w.messageTracerService = &MessageTracerService{
 		TracerManager: w.tracerManager,
 	}
+	w.messageObserverService = &MessageObserverService{
+		MessageObservers: make(map[reflect.Type]MessageObserver),
+	}
 
 	w.messageDispatcher = &MessageDispatcher{
-		MessageHandleService: w.messageHandleService,
-		MessageTracerService: w.messageTracerService,
-		Router:               make(Router),
-		OnHostErrorProc:      w.onHostError,
+		MessageHandleService:   w.messageHandleService,
+		MessageTracerService:   w.messageTracerService,
+		MessageObserverService: w.messageObserverService,
+		Router:                 make(Router),
+		OnHostErrorProc:        w.onHostError,
 	}
 
 	// register TracerManager
@@ -139,6 +145,7 @@ func (w *NsqWorker) init() {
 	}()
 
 	w.messageTracerService.init(w.messageManager)
+	w.messageObserverService.init(w.messageManager)
 	w.messageDispatcher.init()
 	w.configConsumer()
 }
@@ -164,8 +171,11 @@ func (w *NsqWorker) receiveMessage(message *Message) error {
 	}
 
 	// configure nsq.MessageDelegate
+	if message.Delegate == nil {
+		message.Delegate = defaultMessageDelegate
+	}
 	delegate := NewContextMessageDelegate(ctx)
-	delegate.configure(message.Message)
+	delegate.configure(message)
 
 	return w.messageDispatcher.ProcessMessage(ctx, message)
 }

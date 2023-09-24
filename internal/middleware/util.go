@@ -14,6 +14,13 @@ func isMessageHandler(rv reflect.Value) bool {
 	return false
 }
 
+func isMessageObserver(rv reflect.Value) bool {
+	if rv.IsValid() {
+		return rv.Type().AssignableTo(typeOfMessageObserver)
+	}
+	return false
+}
+
 func asMessageHandler(rv reflect.Value) internal.MessageHandler {
 	if rv.IsValid() {
 		if v, ok := rv.Convert(typeOfMessageHandler).Interface().(internal.MessageHandler); ok {
@@ -23,6 +30,14 @@ func asMessageHandler(rv reflect.Value) internal.MessageHandler {
 	return nil
 }
 
+func asMessageObserver(rv reflect.Value) internal.MessageObserver {
+	if rv.IsValid() {
+		if v, ok := rv.Convert(typeOfMessageObserver).Interface().(internal.MessageObserver); ok {
+			return v
+		}
+	}
+	return nil
+}
 
 func asNsqWorker(rv reflect.Value) *internal.NsqWorker {
 	return reflect.NewAt(typeOfHost, unsafe.Pointer(rv.Pointer())).

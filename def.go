@@ -26,6 +26,9 @@ type (
 	LoggingService = middleware.LoggingService
 	EventLog       = middleware.EventLog
 
+	MessageObserver       = internal.MessageObserver
+	MessageObserverAffair = internal.MessageObserverAffair
+
 	MessageHandler = internal.MessageHandler
 	Worker         = internal.NsqWorker
 	Context        = internal.Context

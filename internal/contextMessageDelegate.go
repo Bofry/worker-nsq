@@ -2,9 +2,10 @@ package internal
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/nsqio/go-nsq"
+	nsq "github.com/Bofry/lib-nsq"
 )
 
 var _ nsq.MessageDelegate = new(ContextMessageDelegate)
@@ -14,7 +15,10 @@ type ContextMessageDelegate struct {
 
 	ctx *Context
 
-	mu sync.Mutex
+	messageObserver MessageObserver
+
+	restricted int32
+	mu         sync.Mutex
 }
 
 func NewContextMessageDelegate(ctx *Context) *ContextMessageDelegate {
@@ -24,17 +28,47 @@ func NewContextMessageDelegate(ctx *Context) *ContextMessageDelegate {
 }
 
 func (d *ContextMessageDelegate) OnFinish(msg *nsq.Message) {
+	if d.isRestricted() {
+		GlobalRestrictedMessageDelegate.OnFinish(nil)
+		return
+	}
+
 	d.parent.OnFinish(msg)
 	GlobalContextHelper.InjectReplyCode(d.ctx, PASS)
+
+	// observer
+	if d.messageObserver != nil {
+		d.messageObserver.OnFinish(d.ctx, msg)
+	}
 }
 
-func (d *ContextMessageDelegate) OnRequeue(m *nsq.Message, delay time.Duration, backoff bool) {
-	d.parent.OnRequeue(m, delay, backoff)
+func (d *ContextMessageDelegate) OnRequeue(msg *nsq.Message, delay time.Duration, backoff bool) {
+	if d.isRestricted() {
+		GlobalRestrictedMessageDelegate.OnRequeue(nil, delay, backoff)
+		return
+	}
+
+	d.parent.OnRequeue(msg, delay, backoff)
 	GlobalContextHelper.InjectReplyCode(d.ctx, FAIL)
+
+	// observer
+	if d.messageObserver != nil {
+		d.messageObserver.OnRequeue(d.ctx, msg)
+	}
 }
 
 func (d *ContextMessageDelegate) OnTouch(msg *nsq.Message) {
+	if d.isRestricted() {
+		GlobalRestrictedMessageDelegate.OnTouch(nil)
+		return
+	}
+
 	d.parent.OnTouch(msg)
+
+	// observer
+	if d.messageObserver != nil {
+		d.messageObserver.OnTouch(d.ctx, msg)
+	}
 }
 
 func (d *ContextMessageDelegate) configure(msg *nsq.Message) {
@@ -46,4 +80,24 @@ func (d *ContextMessageDelegate) configure(msg *nsq.Message) {
 			msg.Delegate = d
 		}
 	}
+}
+
+func (d *ContextMessageDelegate) isRestricted() bool {
+	return atomic.LoadInt32(&d.restricted) == 1
+}
+
+func (d *ContextMessageDelegate) restrict() {
+	atomic.StoreInt32(&d.restricted, 1)
+}
+
+func (d *ContextMessageDelegate) unrestrict() {
+	atomic.StoreInt32(&d.restricted, 0)
+}
+
+func (d *ContextMessageDelegate) registerMessageObservers(observers []MessageObserver) {
+	d.messageObserver = CompositeMessageObserver(observers)
+}
+
+func (d *ContextMessageDelegate) unregisterAllMessageObservers() {
+	d.messageObserver = nil
 }

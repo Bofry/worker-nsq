@@ -11,9 +11,10 @@ import (
 var _ MessageHandler = new(MessageDispatcher)
 
 type MessageDispatcher struct {
-	MessageHandleService *MessageHandleService
-	MessageTracerService *MessageTracerService
-	Router               Router
+	MessageHandleService   *MessageHandleService
+	MessageTracerService   *MessageTracerService
+	MessageObserverService *MessageObserverService
+	Router                 Router
 
 	OnHostErrorProc OnHostErrorHandler
 
@@ -39,15 +40,15 @@ func (d *MessageDispatcher) Topics() []string {
 func (d *MessageDispatcher) ProcessMessage(ctx *Context, message *Message) error {
 	// start tracing
 	var (
-		componentID = d.Router.FindHandlerComponentID(message.Topic)
-		carrier     = tracing.NewMessageStateCarrier(&message.Content().State)
+		handlerID = d.Router.FindHandlerComponentID(message.Topic)
+		carrier   = tracing.NewMessageStateCarrier(&message.Content().State)
 
 		spanName string = message.Topic
 		tr       *trace.SeverityTracer
 		sp       *trace.SeveritySpan
 	)
 
-	tr = d.MessageTracerService.Tracer(componentID)
+	tr = d.MessageTracerService.Tracer(handlerID)
 	sp = tr.ExtractWithPropagator(
 		ctx,
 		d.MessageTracerService.TextMapPropagator(),
@@ -63,6 +64,9 @@ func (d *MessageDispatcher) ProcessMessage(ctx *Context, message *Message) error
 
 	// set invalidMessageHandler
 	ctx.invalidMessageHandler = d.InvalidMessageHandler
+
+	// register observer into message
+	d.MessageObserverService.RegisterMessageObservers(message, handlerID)
 
 	return d.MessageHandleService.ProcessMessage(ctx, message, processingState, new(Recover))
 }

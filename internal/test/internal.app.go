@@ -125,6 +125,10 @@ func (provider *ServiceProvider) Init(conf *Config) {
 	provider.ResourceName = "demo resource"
 }
 
+func (provider *ServiceProvider) Logger() *log.Logger {
+	return defaultLogger
+}
+
 func (h *Host) Init(conf *Config) {
 	config := nsq.NewConfig()
 	{

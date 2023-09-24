@@ -1,5 +1,7 @@
 package internal
 
+import "reflect"
+
 type NsqWorkerRegistrar struct {
 	worker *NsqWorker
 }
@@ -32,4 +34,9 @@ func (r *NsqWorkerRegistrar) SetMessageManager(messageManager interface{}) {
 
 func (r *NsqWorkerRegistrar) AddRouter(topic string, handler MessageHandler, handlerComponentID string) {
 	r.worker.messageDispatcher.Router.Add(topic, handler, handlerComponentID)
+}
+
+func (r *NsqWorkerRegistrar) RegisterMessageObserver(v MessageObserver) {
+	t := reflect.TypeOf(v)
+	r.worker.messageObserverService.MessageObservers[t] = v
 }

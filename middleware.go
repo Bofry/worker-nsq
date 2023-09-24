@@ -35,6 +35,16 @@ func UseMessageManager(messageManager interface{}) host.Middleware {
 	}
 }
 
+func UseMessageObserverManager(messageObserverManager interface{}) host.Middleware {
+	if messageObserverManager == nil {
+		panic("argument 'messageObserverManager' cannot be nil")
+	}
+
+	return &middleware.MessageObserverManagerMiddleware{
+		MessageObserverManager: messageObserverManager,
+	}
+}
+
 func UseTracing(enabled bool) host.Middleware {
 	return &middleware.TracingMiddleware{
 		Enabled: enabled,

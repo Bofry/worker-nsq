@@ -112,3 +112,13 @@ func (c *Context) InvalidMessage(message *Message) error {
 	}
 	return nil
 }
+
+func (c *Context) clone() *Context {
+	return &Context{
+		Channel:               c.Channel,
+		context:               c.context,
+		logger:                c.logger,
+		invalidMessageHandler: c.invalidMessageHandler,
+		values:                c.values,
+	}
+}

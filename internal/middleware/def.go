@@ -17,8 +17,9 @@ const (
 )
 
 var (
-	typeOfHost           = reflect.TypeOf(internal.NsqWorker{})
-	typeOfMessageHandler = reflect.TypeOf((*internal.MessageHandler)(nil)).Elem()
+	typeOfHost            = reflect.TypeOf(internal.NsqWorker{})
+	typeOfMessageHandler  = reflect.TypeOf((*internal.MessageHandler)(nil)).Elem()
+	typeOfMessageObserver = reflect.TypeOf((*internal.MessageObserver)(nil)).Elem()
 )
 
 type (
