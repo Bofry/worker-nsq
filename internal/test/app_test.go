@@ -84,7 +84,7 @@ func TestMain(m *testing.M) {
 	godotenv.Load(__ENV_FILE)
 	{
 		p, err := nsq.NewForwarder(&nsq.ProducerConfig{
-			Address: strings.Split(os.Getenv("TEST_NSQD_SEVERS"), ","),
+			Address: strings.Split(os.Getenv("TEST_NSQD_SERVERS"), ","),
 			Config:  nsq.NewConfig(),
 			Logger:  defaultLogger,
 		})
