@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	nsq "github.com/Bofry/lib-nsq"
 	"github.com/Bofry/trace"
 )
 
@@ -31,6 +32,8 @@ var (
 
 type Context struct {
 	Channel string
+
+	consumer *nsq.Consumer
 
 	context context.Context
 	logger  *log.Logger
@@ -113,9 +116,18 @@ func (c *Context) InvalidMessage(message *Message) error {
 	return nil
 }
 
+func (c *Context) Pause(topic ...string) error {
+	return c.consumer.Pause(topic...)
+}
+
+func (c *Context) Resume(topic ...string) error {
+	return c.consumer.Resume(topic...)
+}
+
 func (c *Context) clone() *Context {
 	return &Context{
 		Channel:               c.Channel,
+		consumer:              c.consumer,
 		context:               c.context,
 		logger:                c.logger,
 		invalidMessageHandler: c.invalidMessageHandler,
