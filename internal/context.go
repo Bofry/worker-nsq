@@ -124,6 +124,17 @@ func (c *Context) Resume(topic ...string) error {
 	return c.consumer.Resume(topic...)
 }
 
+func (c *Context) Status() ContextStatus {
+	v := GlobalContextHelper.ExtractReplyCode(c)
+	switch v {
+	case PASS:
+		return ContextStatusOK
+	case FAIL, ABORT:
+		return ContextStatusFail
+	}
+	return ContextStatusUnkonwn
+}
+
 func (c *Context) clone() *Context {
 	return &Context{
 		Channel:               c.Channel,
