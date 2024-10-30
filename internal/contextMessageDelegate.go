@@ -34,7 +34,7 @@ func (d *ContextMessageDelegate) OnFinish(msg *nsq.Message) {
 	}
 
 	d.parent.OnFinish(msg)
-	GlobalContextHelper.InjectReplyCode(d.ctx, PASS)
+	GlobalContextHelper.InjectReplyCodeSafe(d.ctx, PASS)
 
 	// observer
 	if d.messageObserver != nil {
@@ -49,7 +49,7 @@ func (d *ContextMessageDelegate) OnRequeue(msg *nsq.Message, delay time.Duration
 	}
 
 	d.parent.OnRequeue(msg, delay, backoff)
-	GlobalContextHelper.InjectReplyCode(d.ctx, FAIL)
+	GlobalContextHelper.InjectReplyCodeSafe(d.ctx, FAIL)
 
 	// observer
 	if d.messageObserver != nil {
