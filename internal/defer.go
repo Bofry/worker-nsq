@@ -21,8 +21,8 @@ func (d *Defer) Do(do func(f Finalizer) error) error {
 				}
 				err = d.recover.err
 			}
-			f.run(err)
 			d.catch(err)
+			f.run(err)
 		}(Finalizer{d})
 	}
 	return do(Finalizer{d})
