@@ -20,12 +20,6 @@ const (
 )
 
 const (
-	ContextStatusUnkonwn ContextStatus = iota - 1
-	ContextStatusOK
-	ContextStatusFail
-)
-
-const (
 	UNSET ReplyCode = iota
 	PASS
 	FAIL
@@ -63,7 +57,7 @@ var (
 type (
 	ctxReplyKeyType int
 
-	ContextStatus int
+	StatusCode = ReplyCode
 
 	Config  = nsq.Config
 	Message = nsq.Message

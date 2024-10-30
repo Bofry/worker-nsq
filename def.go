@@ -7,15 +7,11 @@ import (
 )
 
 const (
-	// INVALID = internal.INVALID
-	// UNSET   = internal.UNSET
-	// PASS    = internal.PASS
-	// FAIL    = internal.FAIL
-	// ABORT   = internal.ABORT
-
-	ContextStatusUnkonwn = internal.ContextStatusUnkonwn
-	ContextStatusOK      = internal.ContextStatusOK
-	ContextStatusFail    = internal.ContextStatusFail
+	StatusInvalid = internal.INVALID
+	StatusUnset   = internal.UNSET
+	StatusPass    = internal.PASS
+	StatusFail    = internal.FAIL
+	StatusAbort   = internal.ABORT
 )
 
 type (
