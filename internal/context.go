@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	nsq "github.com/Bofry/lib-nsq"
@@ -40,6 +41,7 @@ type Context struct {
 	disableLogging bool
 
 	invalidMessageHandler MessageHandler
+	invalidMessageSent    int32
 
 	values     map[interface{}]interface{}
 	valuesOnce sync.Once
@@ -105,6 +107,10 @@ func (c *Context) RecordingLog(v bool) {
 }
 
 func (c *Context) InvalidMessage(message *Message) error {
+	if !atomic.CompareAndSwapInt32(&c.invalidMessageSent, 0, 1) {
+		c.logger.Fatal("invalid forward; it might be recursive forward message to InvalidMessageHandler")
+	}
+
 	GlobalContextHelper.InjectReplyCode(c, ABORT)
 
 	if c.invalidMessageHandler != nil {

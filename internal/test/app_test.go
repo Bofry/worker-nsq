@@ -451,5 +451,4 @@ func TestStartup_UseMessageObserverManager(t *testing.T) {
 			t.Error(err)
 		}
 	}
-
 }
