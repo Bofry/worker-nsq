@@ -37,6 +37,9 @@ func (h *GoTestTopicMessageHandler) ProcessMessage(ctx *nsq.Context, message *ns
 		h.doSomething(sp.Context())
 		return ctx.InvalidMessage(message)
 	}
+	if message.Topic == "gotest3Topic" {
+		panic("something occurred")
+	}
 	h.counter.increase(sp.Context())
 
 	// NOTE: the parent ProcessMessage will call message.Finish() automatically

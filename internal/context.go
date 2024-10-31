@@ -35,8 +35,9 @@ type Context struct {
 
 	consumer *nsq.Consumer
 
-	context context.Context
-	logger  *log.Logger
+	context        context.Context // parent context
+	logger         *log.Logger
+	disableLogging bool
 
 	invalidMessageHandler MessageHandler
 
@@ -95,20 +96,34 @@ func (c *Context) Logger() *log.Logger {
 	return c.logger
 }
 
+func (c *Context) IsRecordingLog() bool {
+	return !c.disableLogging
+}
+
+func (c *Context) RecordingLog(v bool) {
+	c.disableLogging = !v
+}
+
 func (c *Context) InvalidMessage(message *Message) error {
 	GlobalContextHelper.InjectReplyCode(c, ABORT)
 
 	if c.invalidMessageHandler != nil {
 		var (
-			sp = trace.SpanFromContext(c)
+			tr       = GlobalTracerManager.GenerateManagedTracer(c.invalidMessageHandler)
+			prevSpan = trace.SpanFromContext(c)
 		)
+
+		sp := tr.Start(prevSpan.Context(), __INVALID_MESSAGE_SPAN_NAME)
+		defer sp.End()
 
 		ctx := &Context{
 			logger:                c.logger,
 			values:                c.values,
-			context:               sp.Context(),
+			context:               c,
 			invalidMessageHandler: MessageHandleProc(StopRecursiveForwardMessageHandler),
 		}
+
+		trace.SpanToContext(ctx, sp)
 
 		err := c.invalidMessageHandler.ProcessMessage(ctx, message)
 		_ = err // we won't process the error on InvalidMessageHandler

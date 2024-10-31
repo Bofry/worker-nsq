@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -28,6 +27,7 @@ var (
 )
 
 type MessageManager struct {
+	GoTest3Topic *GoTestTopicMessageHandler `topic:"gotest3Topic"`
 	GoTest2Topic *GoTestTopicMessageHandler `topic:"gotest2Topic"`
 	GoTestTopic  *GoTestTopicMessageHandler `topic:"gotestTopic"`
 	Invalid      *InvalidMessageHandler     `topic:"?"`
@@ -107,6 +107,13 @@ func TestMain(m *testing.M) {
 		}
 
 		{
+			topic := "gotest3Topic"
+			for _, word := range []string{"hello"} {
+				p.Write(topic, []byte(word))
+			}
+		}
+
+		{
 			topic := "unknownTopic"
 			for _, word := range []string{"unknown"} {
 				p.Write(topic, []byte(word))
@@ -155,7 +162,7 @@ func TestStartup(t *testing.T) {
 	{
 		conf := app.Config
 		var expectedNsqAddress string = os.Getenv("TEST_NSQLOOKUPD_ADDRESS")
-		if !reflect.DeepEqual(conf.NsqAddress, expectedNsqAddress) {
+		if conf.NsqAddress != expectedNsqAddress {
 			t.Errorf("assert 'Config.NsqAddress':: expected '%v', got '%v'", expectedNsqAddress, conf.NsqAddress)
 		}
 	}
@@ -172,6 +179,7 @@ func TestStartup_UseTracing(t *testing.T) {
 			nsq.UseMessageManager(&MessageManager{}),
 			nsq.UseErrorHandler(func(ctx *nsq.Context, msg *nsq.Message, err interface{}) {
 				t.Logf("catch err: %v", err)
+				ctx.InvalidMessage(msg)
 			}),
 			nsq.UseTracing(true),
 		).
@@ -237,7 +245,7 @@ func TestStartup_UseTracing(t *testing.T) {
 			if data == nil {
 				t.Errorf("missing data section")
 			}
-			var expectedDataLength int = 14
+			var expectedDataLength int = 15
 			if expectedDataLength != len(data) {
 				t.Errorf("assert 'Jaeger Query size of replies':: expected '%v', got '%v'", expectedDataLength, len(data))
 			}
@@ -250,6 +258,13 @@ func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 		testStartAt   time.Time
 		loggingBuffer bytes.Buffer
 	)
+
+	type MessageManager struct {
+		GoTest3Topic *BlackholdMessageHandler   `topic:"gotest3Topic"`
+		GoTest2Topic *GoTestTopicMessageHandler `topic:"gotest2Topic"`
+		GoTestTopic  *GoTestTopicMessageHandler `topic:"gotestTopic"`
+		Invalid      *InvalidMessageHandler     `topic:"?"`
+	}
 
 	app := App{}
 	starter := nsq.Startup(&app).
@@ -330,7 +345,7 @@ func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 			if data == nil {
 				t.Errorf("missing data section")
 			}
-			var expectedDataLength int = 14
+			var expectedDataLength int = 15
 			if expectedDataLength != len(data) {
 				t.Errorf("assert 'Jaeger Query size of replies':: expected '%v', got '%v'", expectedDataLength, len(data))
 			}
@@ -338,6 +353,10 @@ func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 
 		// test loggingBuffer
 		var expectedLoggingBuffer string = strings.Join([]string{
+			"CreateEventLog()\n",
+			"OnProcessMessage()\n",
+			"OnProcessMessageComplete()\n",
+			"Flush()\n",
 			"CreateEventLog()\n",
 			"OnProcessMessage()\n",
 			"OnProcessMessageComplete()\n",

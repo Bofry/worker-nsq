@@ -28,6 +28,10 @@ func (m *LoggingHandleModule) SetSuccessor(successor internal.MessageHandleModul
 // ProcessMessage implements internal.MessageHandleModule.
 func (m *LoggingHandleModule) ProcessMessage(ctx *internal.Context, message *nsq.Message, state internal.ProcessingState, recover *internal.Recover) error {
 	if m.successor != nil {
+		if !ctx.IsRecordingLog() {
+			return nil
+		}
+
 		evidence := EventEvidence{
 			traceID: state.Span.TraceID(),
 			spanID:  state.Span.SpanID(),
