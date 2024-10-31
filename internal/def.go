@@ -16,8 +16,7 @@ const (
 
 	__CONTEXT_REPLY_KEY ctxReplyKeyType = 0
 
-	__ATTR_ATTEMPTS             = "attempts"
-	__ATTR_MESSAGE_HANDLER_TYPE = "message_handler_type"
+	__ATTR_ATTEMPTS = "attempts"
 
 	__UNDEFINED_TRACER_NAME     = "undefined"
 	__INVALID_MESSAGE_SPAN_NAME = "InvalidMessage"

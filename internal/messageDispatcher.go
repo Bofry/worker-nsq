@@ -40,9 +40,8 @@ func (d *MessageDispatcher) Topics() []string {
 func (d *MessageDispatcher) ProcessMessage(ctx *Context, message *Message) error {
 	// start tracing
 	var (
-		handlerID   = d.Router.FindHandlerComponentID(message.Topic)
-		handlerType = d.Router.FindHandlerType(message.Topic)
-		carrier     = tracing.NewMessageStateCarrier(&message.Content().State)
+		handlerID = d.Router.FindHandlerComponentID(message.Topic)
+		carrier   = tracing.NewMessageStateCarrier(&message.Content().State)
 
 		spanName string = message.Topic
 		tr       *trace.SeverityTracer
@@ -63,7 +62,6 @@ func (d *MessageDispatcher) ProcessMessage(ctx *Context, message *Message) error
 		trace.ConsumerGroup(ctx.Channel),
 		trace.BrokerIP(message.NSQDAddress),
 		trace.MessageID(string(message.ID[:])),
-		trace.Key(__ATTR_MESSAGE_HANDLER_TYPE).String(handlerType.String()),
 		trace.Key(__ATTR_ATTEMPTS).Int(int(message.Attempts)),
 	)
 
