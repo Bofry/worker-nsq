@@ -1,6 +1,8 @@
 package test
 
 import (
+	"fmt"
+
 	"github.com/Bofry/trace"
 	nsq "github.com/Bofry/worker-nsq"
 )
@@ -12,7 +14,7 @@ type InvalidMessageHandler struct {
 }
 
 func (h *InvalidMessageHandler) Init() {
-	defaultLogger.Printf("InvalidMessageHandler.Init()")
+	fmt.Println("InvalidMessageHandler.Init()")
 }
 
 func (h *InvalidMessageHandler) ProcessMessage(ctx *nsq.Context, message *nsq.Message) error {

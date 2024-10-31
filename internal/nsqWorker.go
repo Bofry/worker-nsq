@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"reflect"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/Bofry/host"
 	nsq "github.com/Bofry/lib-nsq"
+	"github.com/Bofry/structproto/reflecting"
 	"github.com/Bofry/trace"
 	"go.opentelemetry.io/otel/propagation"
 )
@@ -144,7 +146,19 @@ func (w *NsqWorker) init() {
 		w.mutex.Unlock()
 	}()
 
-	w.messageTracerService.init(w.messageManager)
+	var invalidMessageHandler = w.messageDispatcher.InvalidMessageHandler
+	if w.messageDispatcher.InvalidMessageHandler == nil {
+		handler, err := w.findInvalidMessageHandler()
+		if err != nil {
+			panic(handler)
+		}
+		registrar := NewNsqWorkerRegistrar(w)
+		registrar.SetInvalidMessageHandler(handler)
+
+		invalidMessageHandler = handler
+	}
+
+	w.messageTracerService.init(w.messageManager, invalidMessageHandler)
 	w.messageObserverService.init(w.messageManager)
 	w.messageDispatcher.init()
 	w.configConsumer()
@@ -197,4 +211,57 @@ func (w *NsqWorker) setTracerProvider(provider *trace.SeverityTracerProvider) {
 
 func (w *NsqWorker) setLogger(l *log.Logger) {
 	w.logger = l
+}
+
+func (w *NsqWorker) findInvalidMessageHandler() (MessageHandler, error) {
+	var (
+		handler MessageHandler
+
+		rvManager reflect.Value = reflect.ValueOf(w.messageManager)
+	)
+	if rvManager.Kind() != reflect.Pointer || rvManager.IsNil() {
+		return nil, nil
+	}
+
+	rvManager = reflect.Indirect(rvManager)
+	numOfHandles := rvManager.NumField()
+	for i := 0; i < numOfHandles; i++ {
+		rvHandler := rvManager.Field(i)
+
+		// is pointer ?
+		if rvHandler.Kind() != reflect.Pointer {
+			continue
+		}
+		// is MessageHandler ?
+		if !IsMessageHandlerType(rvHandler.Type()) {
+			continue
+		}
+
+		if rvHandler.Type().Elem().Name() == __INVALID_MESSAGE_HANDLER_NAME {
+			if rvHandler.IsNil() {
+				rvHandler = reflecting.AssignZero(rvHandler)
+
+				// initialize
+				rv := reflect.Indirect(rvHandler)
+				if rv.CanAddr() {
+					rv = rv.Addr()
+					// call MessageHandler.Init()
+					fn := rv.MethodByName(host.APP_COMPONENT_INIT_METHOD)
+					if fn.IsValid() {
+						if fn.Kind() != reflect.Func {
+							return nil, fmt.Errorf("fail to Init() resource. cannot find func %s() within type %s\n", host.APP_COMPONENT_INIT_METHOD, rv.Type().String())
+						}
+						if fn.Type().NumIn() != 0 || fn.Type().NumOut() != 0 {
+							return nil, fmt.Errorf("fail to Init() resource. %s.%s() type should be func()\n", rv.Type().String(), host.APP_COMPONENT_INIT_METHOD)
+						}
+						fn.Call([]reflect.Value(nil))
+					}
+				}
+			}
+
+			handler = AsMessageHandler(rvHandler)
+			break
+		}
+	}
+	return handler, nil
 }

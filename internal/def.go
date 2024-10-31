@@ -19,7 +19,10 @@ const (
 	__ATTR_ATTEMPTS             = "attempts"
 	__ATTR_MESSAGE_HANDLER_TYPE = "message_handler_type"
 
+	__UNDEFINED_TRACER_NAME     = "undefined"
 	__INVALID_MESSAGE_SPAN_NAME = "InvalidMessage"
+
+	__INVALID_MESSAGE_HANDLER_NAME = "InvalidMessageHandler"
 )
 
 const (
@@ -43,6 +46,7 @@ const (
 
 var (
 	typeOfHost                  = reflect.TypeOf(NsqWorker{})
+	typeOfMessageHandler        = reflect.TypeOf((*MessageHandler)(nil)).Elem()
 	typeOfMessageObserverAffair = reflect.TypeOf((*MessageObserverAffair)(nil)).Elem()
 	defaultTracerProvider       = createNoopTracerProvider()
 	defaultTextMapPropagator    = createNoopTextMapPropagator()

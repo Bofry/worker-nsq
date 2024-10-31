@@ -30,7 +30,7 @@ type MessageManager struct {
 	GoTest3Topic *GoTestTopicMessageHandler `topic:"gotest3Topic"`
 	GoTest2Topic *GoTestTopicMessageHandler `topic:"gotest2Topic"`
 	GoTestTopic  *GoTestTopicMessageHandler `topic:"gotestTopic"`
-	Invalid      *InvalidMessageHandler     `topic:"?"`
+	Invalid      *InvalidMessageHandler
 }
 
 func copyFile(src, dst string) error {

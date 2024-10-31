@@ -108,7 +108,7 @@ func (c *Context) RecordingLog(v bool) {
 
 func (c *Context) InvalidMessage(message *Message) error {
 	if !atomic.CompareAndSwapInt32(&c.invalidMessageSent, 0, 1) {
-		c.logger.Fatal("invalid forward; it might be recursive forward message to InvalidMessageHandler")
+		c.logger.Fatal("invalid operation; message has already been sent to InvalidMessageHandler")
 	}
 
 	GlobalContextHelper.InjectReplyCode(c, ABORT)

@@ -13,9 +13,11 @@ type TracerManager struct {
 	TracerProvider    *trace.SeverityTracerProvider
 	TextMapPropagator propagation.TextMapPropagator
 
-	tracers map[reflect.Type]*trace.SeverityTracer
+	tracers         map[reflect.Type]*trace.SeverityTracer
+	undefinedTracer *trace.SeverityTracer
 
-	mutex sync.Mutex
+	mutex               sync.Mutex
+	undefinedTracerOnce sync.Once
 }
 
 func NewTraceManager() *TracerManager {
@@ -50,6 +52,15 @@ func (m *TracerManager) GenerateManagedTracer(v interface{}) *trace.SeverityTrac
 	return m.createManagedTracer(rt)
 }
 
+func (m *TracerManager) UndefinedTracer() *trace.SeverityTracer {
+	if m.undefinedTracer == nil {
+		m.undefinedTracerOnce.Do(func() {
+			m.undefinedTracer = m.createTracers(__UNDEFINED_TRACER_NAME)
+		})
+	}
+	return m.undefinedTracer
+}
+
 func (m *TracerManager) createManagedTracer(rt reflect.Type) *trace.SeverityTracer {
 	for {
 		if rt.Kind() != reflect.Ptr {
@@ -67,12 +78,12 @@ func (m *TracerManager) createManagedTracer(rt reflect.Type) *trace.SeverityTrac
 		rt.Name(),
 	}, ".")
 
-	tr := m.TracerProvider.Tracer(name)
+	tr := m.createTracers(name)
 	m.tracers[rt] = tr
 
 	return tr
 }
 
-func (m *TracerManager) createTracer(name string) *trace.SeverityTracer {
+func (m *TracerManager) createTracers(name string) *trace.SeverityTracer {
 	return m.TracerProvider.Tracer(name)
 }

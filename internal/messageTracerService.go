@@ -37,7 +37,7 @@ func (s *MessageTracerService) TextMapPropagator() propagation.TextMapPropagator
 	return s.TracerManager.TextMapPropagator
 }
 
-func (s *MessageTracerService) init(messageManager interface{}) {
+func (s *MessageTracerService) init(messageManager interface{}, invalidMessageHandler MessageHandler) {
 	if messageManager == nil {
 		return
 	}
@@ -51,9 +51,9 @@ func (s *MessageTracerService) init(messageManager interface{}) {
 		}
 
 		s.makeTracerMap()
-		s.buildTracer(messageManager)
+		s.buildTracer(messageManager, invalidMessageHandler)
 	}
-	s.makeInvalidMessageTracer()
+	s.makeInvalidMessageTracer(invalidMessageHandler)
 }
 
 func (s *MessageTracerService) makeTracerMap() {
@@ -62,12 +62,16 @@ func (s *MessageTracerService) makeTracerMap() {
 	})
 }
 
-func (s *MessageTracerService) buildTracer(messageManager interface{}) {
+func (s *MessageTracerService) buildTracer(messageManager interface{}, invalidMessageHandler MessageHandler) {
 	var (
-		rvManager reflect.Value = reflect.ValueOf(messageManager)
+		rvInvalidMessageHandler reflect.Value
+		rvManager               reflect.Value = reflect.ValueOf(messageManager)
 	)
 	if rvManager.Kind() != reflect.Pointer || rvManager.IsNil() {
 		return
+	}
+	if invalidMessageHandler != nil {
+		rvInvalidMessageHandler = reflect.ValueOf(invalidMessageHandler)
 	}
 
 	rvManager = reflect.Indirect(rvManager)
@@ -78,8 +82,14 @@ func (s *MessageTracerService) buildTracer(messageManager interface{}) {
 			continue
 		}
 
+		// skip register InvalidMessageHandler
+		if rvInvalidMessageHandler.CanInterface() &&
+			rvHandler.Interface() == rvInvalidMessageHandler.Interface() {
+			continue
+		}
+
 		rvHandler = reflect.Indirect(rvHandler)
-		if rvHandler.Kind() == reflect.Struct {
+		if rvHandler.Kind() == reflect.Struct && !rvHandler.IsZero() {
 			tracer := s.TracerManager.createManagedTracer(rvHandler.Type())
 
 			info := rvManager.Type().Field(i)
@@ -101,13 +111,12 @@ func (s *MessageTracerService) registerTracer(id string, tracer *trace.SeverityT
 	}
 }
 
-func (s *MessageTracerService) makeInvalidMessageTracer() {
-	if len(s.InvalidMessageHandlerComponentID) > 0 {
-		v, ok := s.tracers[s.InvalidMessageHandlerComponentID]
-		if ok {
-			s.invalidMessageTracer = v
-			return
-		}
+func (s *MessageTracerService) makeInvalidMessageTracer(h MessageHandler) {
+	var (
+		tr = s.TracerManager.UndefinedTracer()
+	)
+	if h != nil {
+		tr = s.TracerManager.GenerateManagedTracer(h)
 	}
-	s.invalidMessageTracer = s.TracerManager.createTracer("")
+	s.invalidMessageTracer = tr
 }
