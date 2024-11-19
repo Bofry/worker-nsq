@@ -224,10 +224,13 @@ func TestStartup_UseTracing(t *testing.T) {
 		}
 		client := &http.Client{}
 		resp, err := client.Do(req)
+		if err != nil {
+			t.Error(err)
+		}
 		if resp.StatusCode != 200 {
 			t.Errorf("assert query 'Jeager Query Url StatusCode':: expected '%v', got '%v'", 200, resp.StatusCode)
 		}
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			t.Error(err)
 		}

@@ -29,7 +29,7 @@ func NewContextMessageDelegate(ctx *Context) *ContextMessageDelegate {
 
 func (d *ContextMessageDelegate) OnFinish(msg *nsq.Message) {
 	if d.isRestricted() {
-		GlobalRestrictedMessageDelegate.OnFinish(nil)
+		GlobalNoopMessageDelegate.OnFinish(nil)
 		return
 	}
 
@@ -44,7 +44,7 @@ func (d *ContextMessageDelegate) OnFinish(msg *nsq.Message) {
 
 func (d *ContextMessageDelegate) OnRequeue(msg *nsq.Message, delay time.Duration, backoff bool) {
 	if d.isRestricted() {
-		GlobalRestrictedMessageDelegate.OnRequeue(nil, delay, backoff)
+		GlobalNoopMessageDelegate.OnRequeue(nil, delay, backoff)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (d *ContextMessageDelegate) OnRequeue(msg *nsq.Message, delay time.Duration
 
 func (d *ContextMessageDelegate) OnTouch(msg *nsq.Message) {
 	if d.isRestricted() {
-		GlobalRestrictedMessageDelegate.OnTouch(nil)
+		GlobalNoopMessageDelegate.OnTouch(nil)
 		return
 	}
 

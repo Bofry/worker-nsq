@@ -39,12 +39,16 @@ func (m *LoggingHandleModule) ProcessMessage(ctx *internal.Context, message *nsq
 		}
 
 		eventLog := m.loggingService.CreateEventLog(evidence)
+		// NOTE restrict call Finish(), Requeue(), Touch()
+		internal.GlobalMessageDelegateHelper.Restrict(message)
 		eventLog.OnProcessMessage(message)
 
 		return recover.
 			Defer(func(err interface{}) {
 				if err != nil {
 					defer func() {
+						// NOTE restrict call Finish(), Requeue(), Touch()
+						internal.GlobalMessageDelegateHelper.Restrict(message)
 						eventLog.OnError(message, err, debug.Stack())
 						eventLog.Flush()
 					}()
@@ -57,10 +61,14 @@ func (m *LoggingHandleModule) ProcessMessage(ctx *internal.Context, message *nsq
 					)
 					defer eventLog.Flush()
 
+					// NOTE restrict call Finish(), Requeue(), Touch()
+					internal.GlobalMessageDelegateHelper.Restrict(message)
 					eventLog.OnProcessMessageComplete(message, reply)
 				}
 			}).
 			Do(func(f internal.Finalizer) error {
+				// NOTE restrict call Finish(), Requeue(), Touch()
+				internal.GlobalMessageDelegateHelper.Restrict(message)
 				return m.successor.ProcessMessage(ctx, message, state, recover)
 			})
 	}

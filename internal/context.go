@@ -128,7 +128,6 @@ func (c *Context) InvalidMessage(message *Message) error {
 			context:               c,
 			invalidMessageHandler: MessageHandleProc(StopRecursiveForwardMessageHandler),
 		}
-
 		trace.SpanToContext(ctx, sp)
 
 		err := c.invalidMessageHandler.ProcessMessage(ctx, message)

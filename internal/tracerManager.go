@@ -55,7 +55,7 @@ func (m *TracerManager) GenerateManagedTracer(v interface{}) *trace.SeverityTrac
 func (m *TracerManager) UndefinedTracer() *trace.SeverityTracer {
 	if m.undefinedTracer == nil {
 		m.undefinedTracerOnce.Do(func() {
-			m.undefinedTracer = m.createTracers(__UNDEFINED_TRACER_NAME)
+			m.undefinedTracer = m.createTracer(__UNDEFINED_TRACER_NAME)
 		})
 	}
 	return m.undefinedTracer
@@ -78,12 +78,12 @@ func (m *TracerManager) createManagedTracer(rt reflect.Type) *trace.SeverityTrac
 		rt.Name(),
 	}, ".")
 
-	tr := m.createTracers(name)
+	tr := m.createTracer(name)
 	m.tracers[rt] = tr
 
 	return tr
 }
 
-func (m *TracerManager) createTracers(name string) *trace.SeverityTracer {
+func (m *TracerManager) createTracer(name string) *trace.SeverityTracer {
 	return m.TracerProvider.Tracer(name)
 }

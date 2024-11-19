@@ -51,9 +51,11 @@ var (
 	defaultTextMapPropagator    = createNoopTextMapPropagator()
 	defaultMessageDelegate      = NoopMessageDelegate(0)
 
-	GlobalTracerManager             *TracerManager      // be register from NsqWorker
-	GlobalContextHelper             ContextHelper       = ContextHelper{}
-	GlobalRestrictedMessageDelegate nsq.MessageDelegate = RestrictedMessageDelegate(0)
+	GlobalTracerManager             *TracerManager        // be register from NsqWorker
+	GlobalContextHelper             ContextHelper         = ContextHelper{}
+	GlobalRestrictedMessageDelegate nsq.MessageDelegate   = RestrictedMessageDelegate(0)
+	GlobalNoopMessageDelegate       nsq.MessageDelegate   = NoopMessageDelegate(0)
+	GlobalMessageDelegateHelper     MessageDelegateHelper = MessageDelegateHelper{}
 
 	NsqWorkerModuleInstance = NsqWorkerModule{}
 

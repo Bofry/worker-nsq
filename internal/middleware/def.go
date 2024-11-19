@@ -19,6 +19,9 @@ const (
 var (
 	typeOfHost            = reflect.TypeOf(internal.NsqWorker{})
 	typeOfMessageObserver = reflect.TypeOf((*internal.MessageObserver)(nil)).Elem()
+
+	NoopLoggingServiceSingleton = NoopLoggingService{}
+	NoopEventLogSingleton       = NoopEventLog(0)
 )
 
 type (
