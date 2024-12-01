@@ -22,6 +22,7 @@ type NsqWorker struct {
 	Channel            string
 	HandlerConcurrency int
 	Config             *Config
+	ConsumerOptions    []nsq.ConsumerOption
 
 	consumer *nsq.Consumer
 
@@ -80,7 +81,7 @@ func (w *NsqWorker) Start(ctx context.Context) {
 
 	if len(topics) > 0 {
 		c := w.consumer
-		err := c.Subscribe(topics)
+		err := c.Subscribe(topics, w.ConsumerOptions...)
 		if err != nil {
 			NsqWorkerLogger.Panic(err)
 		}

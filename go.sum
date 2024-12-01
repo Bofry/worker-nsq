@@ -14,6 +14,8 @@ github.com/Bofry/lib-nsq v0.2.0-alpha.20230615164408.0.20230924152354-3009c98655
 github.com/Bofry/lib-nsq v0.2.0-alpha.20230615164408.0.20230924152354-3009c9865572/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
 github.com/Bofry/lib-nsq v0.2.0-alpha.20240702160029 h1:FESDWrvtUGrOMhZdxyxInfvh2dX4S72nfA2WlITnilM=
 github.com/Bofry/lib-nsq v0.2.0-alpha.20240702160029/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
+github.com/Bofry/lib-nsq v0.2.0-alpha.20240702160029.0.20241201043658-f0ad2aede71e h1:O808C23KBPeT1ogJxvUdDg7vg/9QxBt/lTm8bZ5J8o8=
+github.com/Bofry/lib-nsq v0.2.0-alpha.20240702160029.0.20241201043658-f0ad2aede71e/go.mod h1:Gnz4UMgZ7QBMy+4LlmqFwsjbsE5ZHgrzICyzZVL2294=
 github.com/Bofry/structproto v0.2.0-alpha.20221227043020/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
 github.com/Bofry/structproto v0.2.0-alpha.20230613095206 h1:/L/2NiPVAE1La6umcWvIGQwAXuYthoU8uQvrmfCc4fg=
 github.com/Bofry/structproto v0.2.0-alpha.20230613095206/go.mod h1:ExAR9NDYUXZOVlAJrz2oavvVxjaegV7Mb91HQcQYWLA=
