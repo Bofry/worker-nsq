@@ -14,6 +14,15 @@ const (
 	StatusAbort   = internal.ABORT
 )
 
+// Log levels
+const (
+	LogLevelDebug   = nsq.LogLevelDebug
+	LogLevelInfo    = nsq.LogLevelInfo
+	LogLevelWarning = nsq.LogLevelWarning
+	LogLevelError   = nsq.LogLevelError
+	LogLevelMax     = nsq.LogLevelMax
+)
+
 type (
 	ProducerConfig = nsq.ProducerConfig
 	Producer       = nsq.Producer
