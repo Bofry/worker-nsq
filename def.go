@@ -21,6 +21,7 @@ type (
 	Message        = nsq.Message
 	MessageContent = nsq.MessageContent
 	Config         = nsq.Config
+	LogLevel       = nsq.LogLevel
 
 	EventEvidence  = middleware.EventEvidence
 	LoggingService = middleware.LoggingService
