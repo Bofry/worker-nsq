@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -330,7 +329,7 @@ func TestStartup_UseLogging_And_UseTracing(t *testing.T) {
 		if resp.StatusCode != 200 {
 			t.Errorf("assert query 'Jeager Query Url StatusCode':: expected '%v', got '%v'", 200, resp.StatusCode)
 		}
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			t.Error(err)
 		}
